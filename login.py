@@ -8,8 +8,11 @@ import sys
 class Login(QDialog):
     def __init__(self):
         super().__init__()
+        self.setStyleSheet("background-color: #282a36;")
         self.setWindowTitle("Login")
         self.setFixedSize(1200, 750)
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
         # self.setWindowFlags(Qt.FramelessWindowHint)
         self.generalLayout = QGridLayout()
 
@@ -33,6 +36,7 @@ class Login(QDialog):
         # Welcome Label
         self.welcome_label = QLabel("Welcome Back!")
         self.welcome_label.setFont(QFont("Arial", 50))
+        self.welcome_label.setStyleSheet("color: white;")
 
         # Login
         self.id_ledit = QLineEdit()
@@ -40,6 +44,7 @@ class Login(QDialog):
         self.user_tie = QIcon("resources/user-circle.svg")
         self.id_ledit.addAction(self.user_tie, QLineEdit.LeadingPosition)
         self.id_ledit.setFrame(0)
+        self.id_ledit.setStyleSheet("background-color: #44475a;color: white;")
 
         # Password
         self.paswd_ledit = PasswordEdit()
@@ -70,6 +75,7 @@ class PasswordEdit(QLineEdit):
 
         self.visibleIcon = QIcon("resources/eye.svg")
         self.hiddenIcon = QIcon("resources/hidden.svg")
+        self.setStyleSheet("background-color: #44475a;color: white;")
 
         self.setEchoMode(QLineEdit.Password)
 
