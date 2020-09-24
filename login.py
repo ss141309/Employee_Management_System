@@ -1,13 +1,14 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-
 import sys
+import ctypes
 
 
 class Login(QDialog):
     def __init__(self):
         super().__init__()
+        self.setWindowIcon(QIcon('icon.png'))
         self.setStyleSheet("background-color: #282a36;")
         self.setWindowTitle("Login")
         self.setFixedSize(1200, 750)
@@ -17,6 +18,12 @@ class Login(QDialog):
         self.generalLayout = QGridLayout()
 
         self.setLayout(self.generalLayout)
+
+        myappid = 'abcd' # arbitrary string
+        # the following statment tells windows,
+        # that the program that I am running is using Python as a host,
+        # so that I can display its taskbar icon, see: https://bit.ly/3fv9kr7
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
         self.login_banner()
         self.entry()
