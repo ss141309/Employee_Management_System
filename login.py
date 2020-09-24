@@ -57,16 +57,26 @@ class Login(QDialog):
         # Buttons
         self.btns = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(self.btns)
-        self.buttonBox.button(QDialogButtonBox.Ok).setStyleSheet("background: #44475a;color: white;")
-        self.buttonBox.button(QDialogButtonBox.Cancel).setStyleSheet("background: #44475a;color: white;")
+        self.buttonBox.button(QDialogButtonBox.Ok).setStyleSheet(
+            "background: #44475a;color: white;"
+        )
+        self.buttonBox.button(QDialogButtonBox.Cancel).setStyleSheet(
+            "background: #44475a;color: white;"
+        )
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.buttonBox)
 
+        self.verticalSpacer = QSpacerItem(
+            20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
+        )
+
         # Adding Widgets and Layouts
+        self.vlayout.addItem(self.verticalSpacer)
         self.vlayout.addWidget(self.welcome_label)
         self.vlayout.addWidget(self.id_ledit)
         self.vlayout.addWidget(self.paswd_ledit)
         self.vlayout.addLayout(self.layout)
+        self.vlayout.addItem(self.verticalSpacer)
 
         self.generalLayout.addLayout(self.vlayout, 0, 1)
 
