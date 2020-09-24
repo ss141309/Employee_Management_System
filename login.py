@@ -57,6 +57,8 @@ class Login(QDialog):
         # Buttons
         self.btns = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(self.btns)
+        self.buttonBox.button(QDialogButtonBox.Ok).setStyleSheet("background: #44475a")
+        self.buttonBox.button(QDialogButtonBox.Cancel).setStyleSheet("background: #44475a")
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.buttonBox)
 
