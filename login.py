@@ -13,7 +13,7 @@ class Login(QDialog):
         self.setFixedSize(1200, 750)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
-        # self.setWindowFlags(Qt.FramelessWindowHint)
+
         self.generalLayout = QGridLayout()
 
         self.setLayout(self.generalLayout)
@@ -57,6 +57,8 @@ class Login(QDialog):
         # Buttons
         self.btns = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(self.btns)
+        self.buttonBox.button(QDialogButtonBox.Ok).setStyleSheet("background: #44475a;color: white;")
+        self.buttonBox.button(QDialogButtonBox.Cancel).setStyleSheet("background: #44475a;color: white;")
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.buttonBox)
 
