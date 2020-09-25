@@ -1,8 +1,9 @@
+import sys
+import ctypes
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-import sys
-import ctypes
 
 if sys.platform == "win32":
     myappid = "abcd"  # arbitrary string
@@ -75,17 +76,21 @@ class Login(QDialog):
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.buttonBox)
 
-        self.verticalSpacer = QSpacerItem(
+        self.verticalSpacer1 = QSpacerItem(
+            20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
+        )
+
+        self.verticalSpacer2 = QSpacerItem(
             20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
         )
 
         # Adding Widgets and Layouts
-        self.vlayout.addItem(self.verticalSpacer)
+        self.vlayout.addItem(self.verticalSpacer1)
         self.vlayout.addWidget(self.welcome_label)
         self.vlayout.addWidget(self.id_ledit)
         self.vlayout.addWidget(self.paswd_ledit)
         self.vlayout.addLayout(self.layout)
-        self.vlayout.addItem(self.verticalSpacer)
+        self.vlayout.addItem(self.verticalSpacer2)
 
         self.generalLayout.addLayout(self.vlayout, 0, 1)
 
