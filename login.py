@@ -14,7 +14,36 @@ if sys.platform == "win32":
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
 
-class Login(QDialog):
+class PasswordEdit(QLineEdit):
+    def __init__(self, show_visibility=True):
+        super().__init__()
+
+        self.visibleIcon = QIcon("resources/eye.svg")
+        self.hiddenIcon = QIcon("resources/hidden.svg")
+        self.setStyleSheet("background-color: #44475a;color: white;")
+
+        self.setEchoMode(QLineEdit.Password)
+
+        if show_visibility:
+            self.togglepasswordAction = self.addAction(
+                self.visibleIcon, QLineEdit.TrailingPosition
+            )
+            self.togglepasswordAction.triggered.connect(self.on_toggle_password_Action)
+
+        self.password_shown = False
+
+    def on_toggle_password_Action(self):
+        if not self.password_shown:
+            self.setEchoMode(QLineEdit.Normal)
+            self.password_shown = True
+            self.togglepasswordAction.setIcon(self.hiddenIcon)
+        else:
+            self.setEchoMode(QLineEdit.Password)
+            self.password_shown = False
+            self.togglepasswordAction.setIcon(self.visibleIcon)
+
+
+class LoginUI(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowIcon(QIcon("icon.png"))
@@ -95,37 +124,29 @@ class Login(QDialog):
         self.generalLayout.addLayout(self.vlayout, 0, 1)
 
 
-class PasswordEdit(QLineEdit):
-    def __init__(self, show_visibility=True):
-        super().__init__()
+class LoginCtrl:
+    def __init__(self):
+        self.app = QApplication(sys.argv)
+        self.view = LoginUI()
 
-        self.visibleIcon = QIcon("resources/eye.svg")
-        self.hiddenIcon = QIcon("resources/hidden.svg")
-        self.setStyleSheet("background-color: #44475a;color: white;")
+        self.connectSignals()
 
-        self.setEchoMode(QLineEdit.Password)
+    def connectSignals(self):
+        self.view.buttonBox.accepted.connect(self.accept)
+        self.view.buttonBox.rejected.connect(self.reject)
 
-        if show_visibility:
-            self.togglepasswordAction = self.addAction(
-                self.visibleIcon, QLineEdit.TrailingPosition
-            )
-            self.togglepasswordAction.triggered.connect(self.on_toggle_password_Action)
+    def accept(self):
+        print(self.view.id_ledit.text())
+        print(self.view.paswd_ledit.text())
 
-        self.password_shown = False
+    def reject(self):
+        self.view.close()
 
-    def on_toggle_password_Action(self):
-        if not self.password_shown:
-            self.setEchoMode(QLineEdit.Normal)
-            self.password_shown = True
-            self.togglepasswordAction.setIcon(self.hiddenIcon)
-        else:
-            self.setEchoMode(QLineEdit.Password)
-            self.password_shown = False
-            self.togglepasswordAction.setIcon(self.visibleIcon)
+    def run(self):
+        self.view.show()
+        return self.app.exec_()
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = Login()
-    window.show()
-    sys.exit(app.exec())
+    window = LoginCtrl()
+    sys.exit(window.run())
