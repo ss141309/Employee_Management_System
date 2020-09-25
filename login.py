@@ -3,6 +3,7 @@ import sys
 import os
 import ctypes
 import hashlib
+import sqlite3
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -18,12 +19,11 @@ if sys.platform == "win32":
 
 
 class PasswordEdit(QLineEdit):
-    def __init__(self, show_visibility=True):
+    def __init__(self, show_visibility: bool = True):
         super().__init__()
 
         self.visibleIcon = QIcon("resources/eye.svg")
         self.hiddenIcon = QIcon("resources/hidden.svg")
-        self.setStyleSheet("background-color: #44475a;color: white;")
 
         self.setEchoMode(QLineEdit.Password)
 
@@ -50,7 +50,6 @@ class LoginUI(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowIcon(QIcon("resources/icon.svg"))
-        self.setStyleSheet("background-color: #282a36;")
         self.setWindowTitle("Login")
         self.setFixedSize(1200, 750)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
@@ -78,7 +77,6 @@ class LoginUI(QDialog):
         # Welcome Label
         self.welcome_label = QLabel("Welcome Back!")
         self.welcome_label.setFont(QFont("Arial", 50))
-        self.welcome_label.setStyleSheet("color: white;")
 
         # Login
         self.id_ledit = QLineEdit()
@@ -86,7 +84,6 @@ class LoginUI(QDialog):
         self.user_tie = QIcon("resources/user-circle.svg")
         self.id_ledit.addAction(self.user_tie, QLineEdit.LeadingPosition)
         self.id_ledit.setFrame(0)
-        self.id_ledit.setStyleSheet("background-color: #44475a;color: white;")
 
         # Password
         self.paswd_ledit = PasswordEdit()
@@ -99,19 +96,12 @@ class LoginUI(QDialog):
         # Buttons
         self.btns = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(self.btns)
-        self.buttonBox.button(QDialogButtonBox.Ok).setStyleSheet(
-            "background: #44475a;color: white;"
-        )
-        self.buttonBox.button(QDialogButtonBox.Cancel).setStyleSheet(
-            "background: #44475a;color: white;"
-        )
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.buttonBox)
 
         self.verticalSpacer1 = QSpacerItem(
             20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
         )
-
         self.verticalSpacer2 = QSpacerItem(
             20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
         )
@@ -133,7 +123,7 @@ class LoginCtrl:
         self.view = LoginUI()
 
         self.connectSignals()
-        self.hash_paswd("Abhaysing2$")
+        self.set_stylesheet()
 
     def connectSignals(self):
         self.view.buttonBox.accepted.connect(self.accept)
@@ -144,21 +134,40 @@ class LoginCtrl:
         self.pswd_entered = self.view.paswd_ledit.text()
 
         self.salt, self.key = self.hash_paswd(self.pswd_entered)
+        self.check_paswd(self.id_entered, self.pswd_entered)
 
     def reject(self):
         self.view.close()
 
-    def hash_paswd(self, password):
+    def hash_paswd(self, password, salt=os.urandom(32)):
         # urandom generates random numbers for cryptographic use
-        salt = os.urandom(32)  # salt makes it more difficult to crack passwords
+        # salt makes it more difficult to crack password
+        if not isinstance(password, bytes):
+            password = password.encode("utf-8")
 
         # n: iterations count
         # r: block size
         # p: parallelism factor
         # password is encoded because scrypt needs bytes
-        key = hashlib.scrypt(password.encode("utf-8"), salt=salt, n=16384, r=8, p=1)
+        key = hashlib.scrypt(password, salt=salt, n=16384, r=8, p=1)
 
         return (salt, key)
+
+    def check_paswd(self, user_id, passwd):
+        with sqlite3.connect("employee.db") as conn:
+            cur = conn.cursor()
+
+            cur.execute(
+                f"""SELECT PASSWORD, SALT FROM EMPL
+                               WHERE EMP_ID = "{user_id}" """
+            )
+            stored_passwd, stored_salt = cur.fetchone()
+
+        return self.hash_paswd(passwd, stored_salt)[1] == stored_passwd
+
+    def set_stylesheet(self):
+        with open("stylesheet.qss", "r") as qss:
+            self.app.setStyleSheet(qss.read())
 
     def run(self):
         self.view.show()

@@ -1,0 +1,61 @@
+/*-----QWidget-----*/
+QWidget
+{
+	background-color: #282a36;
+	color: white;
+
+}
+
+
+/*-----QLabel-----*/
+QLabel
+{
+	background-color: transparent;
+	color: white;
+
+}
+
+
+/*-----QPushButton-----*/
+QPushButton
+{
+	background-color: #3f3a99;
+	color: #fff;
+	font-size: 13px;
+	font-weight: bold;
+
+}
+
+
+QPushButton::disabled
+{
+	background-color: #5c5c5c;
+
+}
+
+
+QPushButton::hover
+{
+	background-color: #5564f2;
+
+}
+
+
+QPushButton::pressed
+{
+	background-color: #3d4ef2;
+
+}
+
+
+
+/*-----QLineEdit-----*/
+QLineEdit
+{
+	background-color: #c2c7d5;
+	color: #282a36;
+	border: 0.5px;
+	padding: 5px;
+
+}
+
