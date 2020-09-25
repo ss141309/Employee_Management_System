@@ -1,5 +1,7 @@
 import sys
+import os
 import ctypes
+import hashlib
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -46,7 +48,7 @@ class PasswordEdit(QLineEdit):
 class LoginUI(QDialog):
     def __init__(self):
         super().__init__()
-        self.setWindowIcon(QIcon("icon.png"))
+        self.setWindowIcon(QIcon("icon.svg"))
         self.setStyleSheet("background-color: #282a36;")
         self.setWindowTitle("Login")
         self.setFixedSize(1200, 750)
@@ -130,6 +132,7 @@ class LoginCtrl:
         self.view = LoginUI()
 
         self.connectSignals()
+        self.hash_paswd("Abhaysing2$")
 
     def connectSignals(self):
         self.view.buttonBox.accepted.connect(self.accept)
@@ -141,6 +144,18 @@ class LoginCtrl:
 
     def reject(self):
         self.view.close()
+
+    def hash_paswd(self, password):
+        # urandom generates random numbers for cryptographic use
+        self.salt = os.urandom(32)  # salt makes it more difficult to crack passwords
+
+        # n: iterations count
+        # r: block size
+        # p: parallelism factor
+        # password is encoded because scrypt needs bytes
+        self.key1 = hashlib.scrypt(
+            password.encode("utf-8"), salt=self.salt, n=16384, r=8, p=1
+        )
 
     def run(self):
         self.view.show()
