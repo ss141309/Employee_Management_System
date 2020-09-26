@@ -1,7 +1,7 @@
 import sqlite3
 
 
-def tables():
+def tables() -> None:
     with sqlite3.connect("employee.db") as conn:
         conn.execute(
             """ CREATE TABLE IF NOT EXISTS EMPL(
