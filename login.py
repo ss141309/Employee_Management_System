@@ -107,6 +107,10 @@ class LoginUI(QDialog):
         self.welcome_label = QLabel("Welcome Back!")
         self.welcome_label.setFont(QFont("Arial", 50))
 
+        # Warning Label
+        self.wrong_paswd_label = QLabel("Wrong ID or Password entered! Try again")
+        self.wrong_paswd_label.setStyleSheet("color: red")
+
         # Login
         self.id_ledit = QLineEdit()
         self.id_ledit.setPlaceholderText("Enter ID")
@@ -135,8 +139,11 @@ class LoginUI(QDialog):
         self.vlayout.addWidget(self.welcome_label)
         self.vlayout.addWidget(self.id_ledit)
         self.vlayout.addWidget(self.paswd_ledit)
+        self.vlayout.addWidget(self.wrong_paswd_label) 
         self.vlayout.addLayout(self.layout)
         self.vlayout.addItem(self.verticalSpacer2)
+
+        self.wrong_paswd_label.hide()
 
         self.generalLayout.addLayout(self.vlayout, 0, 1)
 
@@ -215,12 +222,7 @@ class LoginCtrl:
         """
         self.view.paswd_ledit.setStyleSheet("border: 0.5px solid red;")
         self.view.id_ledit.setStyleSheet("border: 0.5px solid red;")
-
-        self.wrong_paswd_label = QLabel("Wrong ID or Password entered! Try again")
-        self.wrong_paswd_label.setStyleSheet("color: red")
-        self.view.vlayout.insertWidget(
-            4, self.wrong_paswd_label,
-        )  # the first argument adds the widget to the specified index
+        self.view.wrong_paswd_label.show()
 
     def right_entries(self) -> None:
         """
@@ -229,10 +231,7 @@ class LoginCtrl:
         """
         self.view.paswd_ledit.setStyleSheet("border: solid grey;")
         self.view.id_ledit.setStyleSheet("border: 0.5px solid grey;")
-        try:
-            self.wrong_paswd_label.hide()
-        except AttributeError:
-            pass
+        self.view.wrong_paswd_label.hide()
 
     def set_stylesheet(self) -> None:
         """ sets the style of widgets according to the stylesheet specified """
