@@ -1,19 +1,10 @@
-from PyQt5.QtWidgets import *
-import ctypes
 import sys
-from PyQt5.QtGui import QIcon, QImage, QPixmap, QFont
-from PyQt5.QtCore import Qt
 
-def icon_taskbar() -> None:
-    """
-    Tells windows,that the program running is using Python as a host,
-    so that its taskbar icon can be displayed, see: https://bit.ly/3fv9kr7
-    """
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 
-    if sys.platform == "win32":
-        myappid = "abcd"  # arbitrary string
-
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+from icon_win import icon_taskbar
 
 class MainUI(QDialog):
 

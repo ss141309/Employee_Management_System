@@ -19,23 +19,10 @@ from PyQt5.QtWidgets import (
     QSpacerItem,
     QSizePolicy,
 )
-
 from PyQt5.QtGui import QIcon, QImage, QPixmap, QFont
-
 from PyQt5.QtCore import Qt
 
-
-def icon_taskbar() -> None:
-    """
-    Tells windows,that the program running is using Python as a host,
-    so that its taskbar icon can be displayed, see: https://bit.ly/3fv9kr7
-    """
-
-    if sys.platform == "win32":
-        myappid = "abcd"  # arbitrary string
-
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-
+from icon_win import icon_taskbar
 
 class PasswordEdit(QLineEdit):
     """ Can toggle password visibility """
@@ -126,8 +113,8 @@ class LoginUI(QDialog):
 
         # Buttons
         self.buttonBox = QDialogButtonBox()
-        self.buttonBox.addButton("Login", QDialogButtonBox.AcceptRole)
-        self.buttonBox.addButton("Close", QDialogButtonBox.RejectRole)
+        self.buttonBox.addButton("Login", QDialogButtonBox.AcceptRole).setToolTip("Logins into the application")
+        self.buttonBox.addButton("Close", QDialogButtonBox.RejectRole).setToolTip("Closes the application")
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.buttonBox)
 
