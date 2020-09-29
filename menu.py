@@ -26,18 +26,24 @@ class MainUI(QMainWindow):
         self.top_bar()
 
     def top_bar(self):
-        self.toolbar = QToolBar("My main toolbar")
+        self.toolbar = QToolBar("My Main Toolbar")
         self.toolbar.setIconSize(QSize(100, 100))
         self.toolbar.setFixedHeight(128)
 
         self.dashboard_btn = QAction(QIcon("resources/house-user.svg"), "Dashboard", self)
         self.student_btn = QAction(QIcon("resources/id-card-alt.svg"), "Students", self)
         self.attendance_btn = QAction(QIcon("resources/calendar-alt.svg"), "Attendance", self)
-        
+        self.homework_btn = QAction(QIcon("resources/book.svg"), "Homework", self)
+        self.circular_btn = QAction(QIcon("resources/newspaper.svg"), "Circular", self)
+        self.medical_btn = QAction(QIcon("resources/receipt.svg"), "Apply Leave", self)
+
         self.toolbar.addAction(self.dashboard_btn)
         self.toolbar.addAction(self.student_btn)
         self.toolbar.addAction(self.attendance_btn)
-        
+        self.toolbar.addAction(self.homework_btn)
+        self.toolbar.addAction(self.circular_btn)
+        self.toolbar.addAction(self.medical_btn)
+
         self.toolbar.addSeparator()
         self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         self.addToolBar(self.toolbar)
