@@ -1,32 +1,50 @@
+#! /usr/bin/env python3
 import sys
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QToolBar, QAction
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import QSize, Qt
 
 from icon_win import icon_taskbar
 
-class MainUI(QDialog):
-
-    """ Sets up the UI of the Main Window"""
+class MainUI(QMainWindow):
+    """
+    Sets up the UI of the Main Window
+    """
 
     def __init__(self) -> None:
-
-
         super().__init__()
         self.setWindowIcon(QIcon("resources/icon.svg"))
         self.setWindowTitle("Main Menu")
         self.setGeometry(100,100, 1200, 750)
-        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
-        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
 
-        self.generalLayout = QGridLayout()
-        self.setLayout(self.generalLayout)
+        self.generalLayout = QVBoxLayout()
+        self._centralWidget = QWidget(self)
+        self.setCentralWidget(self._centralWidget)
+        self._centralWidget.setLayout(self.generalLayout)
+
+        self.top_bar()
+
+    def top_bar(self):
+        self.toolbar = QToolBar("My main toolbar")
+        self.toolbar.setIconSize(QSize(100, 100))
+        self.toolbar.setFixedHeight(128)
+
+        self.dashboard_btn = QAction(QIcon("resources/house-user.svg"), "Dashboard", self)
+        self.student_btn = QAction(QIcon("resources/id-card-alt.svg"), "Students", self)
+        self.attendance_btn = QAction(QIcon("resources/calendar-alt.svg"), "Attendance", self)
+        
+        self.toolbar.addAction(self.dashboard_btn)
+        self.toolbar.addAction(self.student_btn)
+        self.toolbar.addAction(self.attendance_btn)
+        
+        self.toolbar.addSeparator()
+        self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+        self.addToolBar(self.toolbar)
+
 
 class MainCtrl():
-
     def __init__(self) -> None:
-
         self.app = QApplication(sys.argv)
         self.view = MainUI()
         self.set_stylesheet()
