@@ -1,11 +1,14 @@
 #! /usr/bin/env python3
 import sys
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QToolBar, QAction
-from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import (QAction, QActionGroup, QApplication, QMainWindow,
+                             QSizePolicy, QSpacerItem, QToolBar, QVBoxLayout,
+                             QWidget)
 
 from icon_win import icon_taskbar
+
 
 class MainUI(QMainWindow):
     """
@@ -16,7 +19,7 @@ class MainUI(QMainWindow):
         super().__init__()
         self.setWindowIcon(QIcon("resources/icon.svg"))
         self.setWindowTitle("Main Menu")
-        self.setGeometry(100,100, 1200, 750)
+        self.setGeometry(100, 100, 1200, 750)
 
         self.generalLayout = QVBoxLayout()
         self._centralWidget = QWidget(self)
@@ -37,19 +40,35 @@ class MainUI(QMainWindow):
         self.circular_btn = QAction(QIcon("resources/newspaper.svg"), "Circular", self)
         self.medical_btn = QAction(QIcon("resources/receipt.svg"), "Apply Leave", self)
 
-        self.toolbar.addAction(self.dashboard_btn)
-        self.toolbar.addAction(self.student_btn)
-        self.toolbar.addAction(self.attendance_btn)
-        self.toolbar.addAction(self.homework_btn)
-        self.toolbar.addAction(self.circular_btn)
-        self.toolbar.addAction(self.medical_btn)
+        self.group = QActionGroup(self)
+        self.group.setExclusive(True)
 
+        self.empty_widget_list = []
+        for empty_widget in range(5):
+            empty_widget = QWidget()
+            empty_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+            self.empty_widget_list.append(empty_widget)
+
+        self.checkable_btns_list = []
+        for checkable_btns in (self.dashboard_btn, self.student_btn, self.attendance_btn, self.homework_btn, self.circular_btn, self.medical_btn):
+            checkable_btns.setCheckable(True)
+            self.checkable_btns_list.append(checkable_btns)
+
+        for tool_btn in range(6):
+            try:
+                self.toolbar.addAction(self.checkable_btns_list[tool_btn])
+                self.group.addAction(self.checkable_btns_list[tool_btn])
+                self.toolbar.addWidget(self.empty_widget_list[tool_btn])
+            except IndexError:
+                break
+            
         self.toolbar.addSeparator()
+        self.toolbar.setMovable(False)
         self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         self.addToolBar(self.toolbar)
 
 
-class MainCtrl():
+class MainCtrl:
     def __init__(self) -> None:
         self.app = QApplication(sys.argv)
         self.view = MainUI()

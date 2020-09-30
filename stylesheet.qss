@@ -58,3 +58,26 @@ QLineEdit
 	padding: 5px;
 
 }
+
+QToolBar {
+    background: #282a36;
+    spacing: 2px; /* spacing between items in the tool bar */
+    border-bottom: 0px;
+    border-top: 0px;
+}
+
+QToolBar::handle {
+    image: url(handle.png);
+}
+
+/* QToolButton { /* all types of tool button */
+/*     border: 2px solid #8f8f91;
+/*     border-radius: 6px;
+/*     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+/*                                       stop: 0 #6070A1, stop: 1 #282a36);
+/* }
+
+/* QToolButton:pressed {
+/*     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+/*                                       stop: 0 #404552, stop: 1 #282a36);
+/* }  */
