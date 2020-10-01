@@ -1,28 +1,19 @@
 #! /usr/bin/env python3
-import sys
-import os
-import ctypes
 import hashlib
+import os
 import sqlite3
-from typing import Union, Tuple
+import sys
+from typing import Tuple, Union
 
-from PyQt5.QtWidgets import (
-    QLineEdit,
-    QDialog,
-    QApplication,
-    QGridLayout,
-    QWidget,
-    QLabel,
-    QVBoxLayout,
-    QHBoxLayout,
-    QDialogButtonBox,
-    QSpacerItem,
-    QSizePolicy,
-)
-from PyQt5.QtGui import QIcon, QImage, QPixmap, QFont
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont, QIcon, QImage, QPixmap
+from PyQt5.QtWidgets import (QApplication, QDialog, QDialogButtonBox,
+                             QGridLayout, QLabel, QLineEdit, QSizePolicy,
+                             QSpacerItem, QVBoxLayout, QWidget)
 
 from icon_win import icon_taskbar
+from menu import MainCtrl
+
 
 class PasswordEdit(QLineEdit):
     """ Can toggle password visibility """
@@ -59,7 +50,7 @@ class LoginUI(QDialog):
         super().__init__()
         self.setWindowIcon(QIcon("resources/icon.svg"))
         self.setWindowTitle("Login")
-        self.setFixedSize(1200, 750)
+        #self.setFixedSize(1200, 750)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
 
@@ -77,6 +68,7 @@ class LoginUI(QDialog):
         label_Image = QLabel(frame)
         image_path = "resources/Login.png"  # path to your image file
         image_profile = QImage(image_path)  # QImage object
+        image_profile = image_profile.scaled(234, 234, aspectRatioMode=Qt.KeepAspectRatio, transformMode=Qt.SmoothTransformation)
         label_Image.setPixmap(QPixmap.fromImage(image_profile))
 
         self.generalLayout.addWidget(label_Image, 0, 0)
@@ -115,8 +107,8 @@ class LoginUI(QDialog):
         self.buttonBox = QDialogButtonBox()
         self.buttonBox.addButton("Login", QDialogButtonBox.AcceptRole).setToolTip("Logins into the application")
         self.buttonBox.addButton("Close", QDialogButtonBox.RejectRole).setToolTip("Closes the application")
-        self.layout = QVBoxLayout()
-        self.layout.addWidget(self.buttonBox)
+        self.vert_layout = QVBoxLayout()
+        self.vert_layout.addWidget(self.buttonBox)
 
         self.verticalSpacer1 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         self.verticalSpacer2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
@@ -127,7 +119,7 @@ class LoginUI(QDialog):
         self.vlayout.addWidget(self.id_ledit)
         self.vlayout.addWidget(self.paswd_ledit)
         self.vlayout.addWidget(self.wrong_paswd_label) 
-        self.vlayout.addLayout(self.layout)
+        self.vlayout.addLayout(self.vert_layout)
         self.vlayout.addItem(self.verticalSpacer2)
 
         self.wrong_paswd_label.hide()
@@ -146,10 +138,10 @@ class LoginCtrl:
         self.set_stylesheet()
 
     def connectSignals(self) -> None:
-        self.view.buttonBox.accepted.connect(self.accept)
+        self.view.buttonBox.accepted.connect(self.accept_creds)
         self.view.buttonBox.rejected.connect(self.reject)
 
-    def accept(self) -> None:
+    def accept_creds(self) -> None:
         """
         Gets the id and password entered
         Checks if the password entered is correct
@@ -219,6 +211,7 @@ class LoginCtrl:
         self.view.paswd_ledit.setStyleSheet("border: solid grey;")
         self.view.id_ledit.setStyleSheet("border: 0.5px solid grey;")
         self.view.wrong_paswd_label.hide()
+        self.view.accept()
 
     def set_stylesheet(self) -> None:
         """ sets the style of widgets according to the stylesheet specified """
@@ -228,10 +221,12 @@ class LoginCtrl:
 
     def run(self) -> int:
         self.view.show()
-        return self.app.exec_()
+        return self.view.exec_()
 
 
 if __name__ == "__main__":
     icon_taskbar()
     window = LoginCtrl()
-    sys.exit(window.run())
+    if window.run() == QDialog.Accepted:
+        main_menu = MainCtrl()
+        sys.exit(main_menu.run())
