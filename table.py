@@ -17,6 +17,7 @@ def hw_table() -> None:
     with sqlite3.connect("employee.db") as conn:
         conn.execute(
             """ CREATE TABLE IF NOT EXISTS HW(
+                       HW_ID INTEGER PRIMARY KEY,
                        TITLE TEXT,
                        CLASS TEXT,
                        SUBJECT TEXT,

@@ -1,14 +1,34 @@
 #! /usr/bin/env python3
 import sqlite3
 import sys
+from time import time_ns
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
                              QLineEdit, QMainWindow, QPushButton, QScrollArea,
                              QSizePolicy, QTextEdit, QVBoxLayout, QWidget)
 
 from icon_win import icon_taskbar
 from table import hw_table
+
+
+class QLabelClicked(QLabel):
+    clicked = pyqtSignal()
+
+    def __init__(self, parent=None):
+        QLabel.__init__(self, parent)
+
+        self.setStyleSheet(
+            """
+            QLabel::hover
+            {
+            background-color: #414451;
+
+            }"""
+        )
+
+    def mousePressEvent(self, env):
+        self.clicked.emit()
 
 
 class HomeWorkUI(QMainWindow):
@@ -32,7 +52,7 @@ class HomeWorkUI(QMainWindow):
         self.descrip()
         self.btns()
 
-    def past_hw(self):
+    def past_hw(self) -> None:
         self.scroll = QScrollArea()
         self.widget = QWidget()
         self.vbox = QVBoxLayout()
@@ -44,8 +64,10 @@ class HomeWorkUI(QMainWindow):
             cur.execute("SELECT CLASS, SUBJECT, TITLE FROM HW")
             past_hw = cur.fetchall()
 
+        self.past_hw_list = []
         for assign_class, subject, title in past_hw:
-            label = QLabel(f"[{assign_class}:{subject}] {title}")
+            label = QLabelClicked(f"[{assign_class}:{subject}] {title}")
+            self.past_hw_list.append(label)
             self.vbox.addWidget(label)
 
         self.widget.setLayout(self.vbox)
@@ -54,6 +76,7 @@ class HomeWorkUI(QMainWindow):
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.scroll.setWidgetResizable(True)
         self.scroll.setWidget(self.widget)
+        self.scroll.setObjectName("Scroll")
 
         self.generalLayout.addWidget(self.scroll, 2)
 
@@ -91,7 +114,7 @@ class HomeWorkUI(QMainWindow):
         self.vertLayout.addWidget(self.class_label)
         self.vertLayout.addWidget(self.class_combo_box)
 
-    def subject(self):
+    def subject(self) -> None:
         subject_list = (
             "Physics",
             "Chemistry",
@@ -116,7 +139,7 @@ class HomeWorkUI(QMainWindow):
         self.vertLayout.addWidget(self.subject_label)
         self.vertLayout.addWidget(self.sub_combo_box)
 
-    def descrip(self):
+    def descrip(self) -> None:
         self.descrip_label = QLabel("Description (Homework)")
 
         self.descrip = QTextEdit()
@@ -124,19 +147,19 @@ class HomeWorkUI(QMainWindow):
         self.vertLayout.addWidget(self.descrip_label)
         self.vertLayout.addWidget(self.descrip)
 
-    def btns(self):
+    def btns(self) -> None:
         self.ok = QPushButton()
-        self.cancel = QPushButton()
+        self.clear = QPushButton()
 
         self.ok.setText("Add")
-        self.cancel.setText("Cancel")
+        self.clear.setText("Clear")
 
         self.empty = QWidget()
         self.empty.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         self.hlayout = QHBoxLayout()
         self.hlayout.addWidget(self.empty)
         self.hlayout.addWidget(self.ok)
-        self.hlayout.addWidget(self.cancel)
+        self.hlayout.addWidget(self.clear)
 
         self.vertLayout.addLayout(self.hlayout)
 
@@ -150,28 +173,33 @@ class HomeWorkCtrl:
         self.set_stylesheet()
         self.connectSignals()
 
-    def connectSignals(self):
-        self.view.cancel.clicked.connect(self.cancel)
+    def connectSignals(self) -> None:
+        self.view.clear.clicked.connect(self.cancel)
         self.view.ok.clicked.connect(self.ok)
 
-    def cancel(self):
+        for hw in self.view.past_hw_list:
+            hw.clicked.connect(lambda: print(5))
+
+    def cancel(self) -> None:
         self.view.title_ledit.clear()
         self.view.descrip.clear()
 
-    def ok(self):
+    def ok(self) -> None:
         self.title = self.view.title_ledit.text()
         self.hw_class = self.view.class_combo_box.currentText()
         self.subject = self.view.sub_combo_box.currentText()
         self.descrip = self.view.descrip.toPlainText()
 
-        with sqlite3.connect("employee.db") as conn:
-            conn.execute(
-                f""" INSERT INTO HW
-                         VALUES("{self.title}",
-                                "{self.hw_class}",
-                                "{self.subject}",
-                                "{self.descrip}") """
-            )
+        if self.title and self.descrip:
+            with sqlite3.connect("employee.db") as conn:
+                conn.execute(
+                    f""" INSERT INTO HW
+                              VALUES( {time_ns()},
+                                     "{self.title}",
+                                     "{self.hw_class}",
+                                     "{self.subject}",
+                                     "{self.descrip}") """
+                )
 
     def set_stylesheet(self) -> None:
         """ sets the style of widgets according to the stylesheet specified """
