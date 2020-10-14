@@ -21,7 +21,6 @@ QPushButton
 	background-color: #3f3a99;
 	color: #fff;
 	font-size: 13px;
-	font-weight: bold;
 
 }
 

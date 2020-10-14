@@ -1,10 +1,8 @@
 #! /usr/bin/env python3
-import faulthandler
 import sys
 
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QStackedLayout,
-                             QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedLayout, QWidget
 
 from hw import HomeWorkCtrl
 from icon_win import icon_taskbar
@@ -33,8 +31,15 @@ class MainUI(QMainWindow):
         self.hw = HomeWorkCtrl()
         self.generalLayout.addWidget(self.hw.view._centralWidget)
 
+        
 
-#        self.generalLayout.setCurrentIndex(2)
+        self.connect_toolbar()
+
+    def connect_toolbar(self) -> None:
+        self.tool_bar.homework_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(0))
+
+
+
         
    
 class MainCtrl:
