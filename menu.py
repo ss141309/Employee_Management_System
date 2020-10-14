@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+import faulthandler
 import sys
 
 from PyQt5.QtGui import QIcon
@@ -7,7 +8,6 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QStackedLayout,
 
 from hw import HomeWorkCtrl
 from icon_win import icon_taskbar
-from leave import LeaveCtrl
 from toolbar import ToolBar
 
 
@@ -33,8 +33,6 @@ class MainUI(QMainWindow):
         self.hw = HomeWorkCtrl()
         self.generalLayout.addWidget(self.hw.view._centralWidget)
 
-        self.leave = LeaveCtrl()
-        self.generalLayout.addWidget(self.leave.view._centralWidget)
 
 #        self.generalLayout.setCurrentIndex(2)
         
@@ -61,4 +59,3 @@ if __name__ == "__main__":
     icon_taskbar()
     window = MainCtrl()
     sys.exit(window.run())
-

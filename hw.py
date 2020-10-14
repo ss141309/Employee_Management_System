@@ -2,6 +2,7 @@
 import sqlite3
 import sys
 from time import time_ns
+from typing import Tuple
 
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
@@ -13,10 +14,13 @@ from table import hw_table
 
 
 class QLabelClicked(QLabel):
+    """
+    Created a clickable QLabel
+    """
     clicked = pyqtSignal()
 
-    def __init__(self, parent=None):
-        QLabel.__init__(self, parent)
+    def __init__(self, text=None):
+        QLabel.__init__(self, text)
 
         self.setStyleSheet(
             """
@@ -25,10 +29,10 @@ class QLabelClicked(QLabel):
             background-color: #414451;
 
             }"""
-        )
+        )  # show colour when hovered on
 
     def mousePressEvent(self, env):
-        self.clicked.emit()
+        self.clicked.emit() # emit a signal when clicked
 
 
 class HomeWorkUI(QMainWindow):
@@ -53,7 +57,11 @@ class HomeWorkUI(QMainWindow):
         self.btns()
 
     def past_hw(self) -> None:
-        self.scroll = QScrollArea()
+        """
+        Creates a scroll area, which displays past homework
+        """
+
+        self.hw_scroll = QScrollArea()
         self.widget = QWidget()
         self.vbox = QVBoxLayout()
 
@@ -61,26 +69,29 @@ class HomeWorkUI(QMainWindow):
         with sqlite3.connect("employee.db") as conn:
             cur = conn.cursor()
 
-            cur.execute("SELECT CLASS, SUBJECT, TITLE FROM HW")
+            cur.execute("SELECT CLASS, SUBJECT, TITLE, HW_ID FROM HW")
             past_hw = cur.fetchall()
 
         self.past_hw_list = []
-        for assign_class, subject, title in past_hw:
+        for assign_class, subject, title, hw_id in past_hw:
             label = QLabelClicked(f"[{assign_class}:{subject}] {title}")
-            self.past_hw_list.append(label)
+            self.past_hw_list.append([label, hw_id])
             self.vbox.addWidget(label)
 
         self.widget.setLayout(self.vbox)
 
-        self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.scroll.setWidgetResizable(True)
-        self.scroll.setWidget(self.widget)
-        self.scroll.setObjectName("Scroll")
+        self.hw_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.hw_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.hw_scroll.setWidgetResizable(True)
+        self.hw_scroll.setWidget(self.widget)
 
-        self.generalLayout.addWidget(self.scroll, 2)
+        self.generalLayout.addWidget(self.hw_scroll, 2)
 
     def title(self) -> None:
+        """
+        Add title QLabel and QLineEdit
+        """
+
         self.title_label = QLabel("Title")
         self.title_ledit = QLineEdit()
 
@@ -88,6 +99,10 @@ class HomeWorkUI(QMainWindow):
         self.vertLayout.addWidget(self.title_ledit)
 
     def student_class(self) -> None:
+        """
+        Add a combobox to select class for homework
+        """
+
         class_list = (
             "Pre Nursery",
             "Nursery",
@@ -115,6 +130,9 @@ class HomeWorkUI(QMainWindow):
         self.vertLayout.addWidget(self.class_combo_box)
 
     def subject(self) -> None:
+        """
+        Add a combobox to add subject to homework
+        """
         subject_list = (
             "Physics",
             "Chemistry",
@@ -140,14 +158,20 @@ class HomeWorkUI(QMainWindow):
         self.vertLayout.addWidget(self.sub_combo_box)
 
     def descrip(self) -> None:
+        """
+        Add a QTextEdit field to add description of homework
+        """
         self.descrip_label = QLabel("Description (Homework)")
 
-        self.descrip = QTextEdit()
+        self.hw_descrip = QTextEdit()
 
         self.vertLayout.addWidget(self.descrip_label)
-        self.vertLayout.addWidget(self.descrip)
+        self.vertLayout.addWidget(self.hw_descrip)
 
     def btns(self) -> None:
+        """
+        Add buttons to add and clear homework
+        """
         self.ok = QPushButton()
         self.clear = QPushButton()
 
@@ -167,6 +191,9 @@ class HomeWorkUI(QMainWindow):
 
 
 class HomeWorkCtrl:
+    """
+    Controls HomeWorkUI
+    """
     def __init__(self) -> None:
         self.app = QApplication(sys.argv)
         self.view = HomeWorkUI()
@@ -174,32 +201,143 @@ class HomeWorkCtrl:
         self.connectSignals()
 
     def connectSignals(self) -> None:
+        """
+        Connects signals
+        """
         self.view.clear.clicked.connect(self.cancel)
-        self.view.ok.clicked.connect(self.ok)
+        self.view.ok.clicked.connect(self.add)
 
         for hw in self.view.past_hw_list:
-            hw.clicked.connect(lambda: print(5))
+            hw[0].clicked.connect(lambda: self.set_past_ui(hw[1]))
 
     def cancel(self) -> None:
+        """
+        Clears text in the field
+        If button is named "New" connects it to the add function
+        """
         self.view.title_ledit.clear()
-        self.view.descrip.clear()
+        self.view.hw_descrip.clear()
 
-    def ok(self) -> None:
+        if self.view.clear.text() == "New":
+            self.view.title_ledit.setEnabled(True)
+            self.view.class_combo_box.setEnabled(True)
+            self.view.sub_combo_box.setEnabled(True)
+            self.view.hw_descrip.setEnabled(True)
+
+            self.view.ok.setText("Add")
+            self.view.clear.setText("Clear")
+
+            self.view.ok.clicked.disconnect()
+            self.view.ok.clicked.connect(self.add)
+
+    def get_current_text(self) -> None:
+        """
+        Gets the current entered text in the fields
+        """
         self.title = self.view.title_ledit.text()
         self.hw_class = self.view.class_combo_box.currentText()
         self.subject = self.view.sub_combo_box.currentText()
-        self.descrip = self.view.descrip.toPlainText()
+        self.hw_descrip = self.view.hw_descrip.toPlainText()
+        
 
-        if self.title and self.descrip:
+    def add(self) -> None:
+        """
+        Adds the homework to the database
+        """
+        self.get_current_text()
+        
+        if self.title and self.hw_descrip:
             with sqlite3.connect("employee.db") as conn:
                 conn.execute(
-                    f""" INSERT INTO HW
-                              VALUES( {time_ns()},
-                                     "{self.title}",
-                                     "{self.hw_class}",
-                                     "{self.subject}",
-                                     "{self.descrip}") """
+                    """ INSERT INTO HW
+                              VALUES(?, ?, ?, ?, ?) """,
+                    (
+                        time_ns(),
+                        self.title,
+                        self.hw_class,
+                        self.subject,
+                        self.hw_descrip,
+                    ),
                 )
+
+    def edit(self, hw_id: int) -> None:
+        """
+        Sets the fields editable
+        Connects to the update function
+        """
+        self.view.title_ledit.setEnabled(True)
+        self.view.class_combo_box.setEnabled(True)
+        self.view.sub_combo_box.setEnabled(True)
+        self.view.hw_descrip.setEnabled(True)
+
+        self.view.ok.setText("Update")
+
+        self.view.ok.clicked.disconnect()
+        self.view.ok.clicked.connect(lambda: self.update(hw_id))
+
+    def update(self, hw_id: int) -> None:
+        """
+        Updates the homework
+        """
+        self.get_current_text()
+        
+        if self.title and self.hw_descrip:
+             with sqlite3.connect("employee.db") as conn:
+                conn.execute(
+                    """ UPDATE HW
+                            SET TITLE = ?,
+                                CLASS = ?,
+                                SUBJECT = ?,
+                                DESCRIPTION = ?
+                       WHERE HW_ID = ?""",
+                    (
+                        self.title,
+                        self.hw_class,
+                        self.subject,
+                        self.hw_descrip,
+                        hw_id,
+                    ),
+                )
+
+    def get_past_hw(self, hw_id: int) -> Tuple[str, str, str, str]:
+        """
+        Gets the hw title, class, subject and description
+        """
+        with sqlite3.connect("employee.db") as conn:
+            cur = conn.cursor()
+
+            cur.execute(
+                """SELECT TITLE, CLASS, SUBJECT, DESCRIPTION
+                           FROM HW
+                           WHERE HW_ID = ?""",
+                (hw_id,),
+            )
+            row = cur.fetchone()
+
+        return row
+
+    def set_past_ui(self, hw_id: int):
+        """
+        Sets the fields non editable
+        Connects to the edit function
+        """
+        past_hw_list = self.get_past_hw(hw_id)
+
+        self.view.title_ledit.setText(past_hw_list[0])
+        self.view.class_combo_box.setCurrentText(past_hw_list[1])
+        self.view.sub_combo_box.setCurrentText(past_hw_list[2])
+        self.view.hw_descrip.setPlainText(past_hw_list[3])
+
+        self.view.title_ledit.setEnabled(False)
+        self.view.class_combo_box.setEnabled(False)
+        self.view.sub_combo_box.setEnabled(False)
+        self.view.hw_descrip.setEnabled(False)
+
+        self.view.ok.setText("Edit")
+        self.view.clear.setText("New")
+
+        self.view.ok.clicked.disconnect()
+        self.view.ok.clicked.connect(lambda: self.edit(hw_id))
 
     def set_stylesheet(self) -> None:
         """ sets the style of widgets according to the stylesheet specified """
