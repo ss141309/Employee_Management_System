@@ -208,7 +208,9 @@ class HomeWorkCtrl:
         self.view.ok.clicked.connect(self.add)
 
         for hw in self.view.past_hw_list:
-            hw[0].clicked.connect(lambda: self.set_past_ui(hw[1]))
+            hw[0].clicked.connect(lambda hw=hw: self.set_past_ui(hw[1]))
+
+            
 
     def cancel(self) -> None:
         """
