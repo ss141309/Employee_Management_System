@@ -250,7 +250,8 @@ class HomeWorkCtrl:
         
         if self.title and self.hw_descrip:
             with sqlite3.connect("employee.db") as conn:
-                conn.execute(
+                cur = conn.cursor()
+                cur.execute(
                     """ INSERT INTO HW
                               VALUES(?, ?, ?, ?, ?) """,
                     (
@@ -261,6 +262,19 @@ class HomeWorkCtrl:
                         self.hw_descrip,
                     ),
                 )
+
+            # Dynamically adding new homework in scroll area
+                cur.execute("""SELECT HW_ID, TITLE, CLASS, SUBJECT
+                                   FROM HW ORDER BY HW_ID DESC LIMIT 1""")
+                
+                hw_id, title, class_assigned, subject = cur.fetchone()
+
+            label = QLabelClicked(f"[{class_assigned}:{subject}] {title}")
+            self.view.past_hw_list.append([label, hw_id])
+            self.view.vbox.addWidget(label)
+            
+            label.clicked.connect(lambda: self.set_past_ui(hw_id)) # making the newly added hw clickable
+                
 
     def edit(self, hw_id: int) -> None:
         """
@@ -284,8 +298,9 @@ class HomeWorkCtrl:
         self.get_current_text()
         
         if self.title and self.hw_descrip:
-             with sqlite3.connect("employee.db") as conn:
-                conn.execute(
+            with sqlite3.connect("employee.db") as conn:
+                cur = conn.cursor() 
+                cur.execute(
                     """ UPDATE HW
                             SET TITLE = ?,
                                 CLASS = ?,
@@ -300,6 +315,16 @@ class HomeWorkCtrl:
                         hw_id,
                     ),
                 )
+
+             # Dynamically updating homework in scroll area
+                cur.execute("""SELECT TITLE, CLASS, SUBJECT
+                                   FROM HW WHERE HW_ID = ?""", (hw_id,))
+                
+                title, class_assigned, subject = cur.fetchone()
+
+            for i in self.view.past_hw_list:
+                if i[1] == hw_id:
+                    i[0].setText(f"[{class_assigned}:{subject}] {title}")
 
     def get_past_hw(self, hw_id: int) -> Tuple[str, str, str, str]:
         """
