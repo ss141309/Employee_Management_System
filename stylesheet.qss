@@ -106,3 +106,7 @@ QScrollBar::sub-line:vertical {
     subcontrol-position: top;
     subcontrol-origin: margin;
 }
+
+QDateEdit::drop-down{
+    image: url('./resources/calendarpopup.svg');
+}

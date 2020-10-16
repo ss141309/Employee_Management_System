@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedLayout, QWidget
 
 from hw import HomeWorkCtrl
 from icon_win import icon_taskbar
+from leave import LeaveCtrl
 from overview import DashBoardCtrl
 from toolbar import ToolBar
 
@@ -35,13 +36,16 @@ class MainUI(QMainWindow):
         self.hw = HomeWorkCtrl()
         self.generalLayout.addWidget(self.hw.view._centralWidget)
 
-        
+        self.leave = LeaveCtrl()
+        self.generalLayout.addWidget(self.leave.view._centralWidget)
 
+        
         self.connect_toolbar()
 
     def connect_toolbar(self) -> None:
-        self.tool_bar.dashboard_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(0))
-        self.tool_bar.homework_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(1))
+        self.tool_bar.homework_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(0))
+        self.tool_bar.medical_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(1))
+
 
 class MainCtrl:
     def __init__(self,  emp_id: str = "abcd") -> None:
