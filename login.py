@@ -228,5 +228,5 @@ if __name__ == "__main__":
     icon_taskbar()
     window = LoginCtrl()
     if window.run() == QDialog.Accepted:
-        main_menu = MainCtrl()
+        main_menu = MainCtrl(window.id_entered)
         sys.exit(main_menu.run())

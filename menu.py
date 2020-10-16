@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedLayout, QWidget
 
 from hw import HomeWorkCtrl
 from icon_win import icon_taskbar
+from overview import DashBoardCtrl
 from toolbar import ToolBar
 
 
@@ -14,7 +15,7 @@ class MainUI(QMainWindow):
     Sets up the UI of the Main Window
     """
 
-    def __init__(self) -> None:
+    def __init__(self, emp_id: str) -> None:
         super().__init__()
         self.setWindowIcon(QIcon("resources/icon.svg"))
         self.setWindowTitle("Main Menu")
@@ -28,6 +29,9 @@ class MainUI(QMainWindow):
         self.tool_bar = ToolBar()
         self.addToolBar(self.tool_bar.toolbar)
 
+        self.ovrvw = DashBoardCtrl(emp_id)
+        self.generalLayout.addWidget(self.ovrvw.view._centralWidget)
+
         self.hw = HomeWorkCtrl()
         self.generalLayout.addWidget(self.hw.view._centralWidget)
 
@@ -36,16 +40,13 @@ class MainUI(QMainWindow):
         self.connect_toolbar()
 
     def connect_toolbar(self) -> None:
-        self.tool_bar.homework_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(0))
+        self.tool_bar.dashboard_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(0))
+        self.tool_bar.homework_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(1))
 
-
-
-        
-   
 class MainCtrl:
-    def __init__(self) -> None:
+    def __init__(self,  emp_id: str = "abcd") -> None:
         self.app = QApplication(sys.argv)
-        self.view = MainUI()
+        self.view = MainUI(emp_id)
         self.set_stylesheet()
 
     def set_stylesheet(self) -> None:

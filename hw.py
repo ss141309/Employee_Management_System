@@ -9,7 +9,6 @@ from PyQt5.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
                              QLineEdit, QMainWindow, QPushButton, QScrollArea,
                              QSizePolicy, QTextEdit, QVBoxLayout, QWidget)
 
-from icon_win import icon_taskbar
 from table import hw_table
 
 
@@ -80,10 +79,10 @@ class HomeWorkUI(QMainWindow):
 
         self.widget.setLayout(self.vbox)
 
-        self.hw_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.hw_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.hw_scroll.setWidgetResizable(True)
         self.hw_scroll.setWidget(self.widget)
+        self.hw_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.hw_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
 
         self.generalLayout.addWidget(self.hw_scroll, 2)
 
@@ -379,6 +378,5 @@ class HomeWorkCtrl:
 
 
 if __name__ == "__main__":
-    icon_taskbar()
     window = HomeWorkCtrl()
     sys.exit(window.run())
