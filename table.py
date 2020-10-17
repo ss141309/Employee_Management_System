@@ -34,5 +34,6 @@ def hw_table() -> None:
                        TITLE TEXT,
                        CLASS TEXT,
                        SUBJECT TEXT,
+                       DUE_DATE TEXT,
                        DESCRIPTION TEXT)"""
         )
