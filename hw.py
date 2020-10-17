@@ -1,13 +1,14 @@
 #! /usr/bin/env python3
 import sqlite3
 import sys
+from datetime import date
 from time import time_ns
 from typing import Tuple
 
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QDateTime
 from PyQt5.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
                              QLineEdit, QMainWindow, QPushButton, QScrollArea,
-                             QSizePolicy, QTextEdit, QVBoxLayout, QWidget)
+                             QSizePolicy, QTextEdit, QVBoxLayout, QWidget, QDateEdit)
 
 from table import hw_table
 
@@ -52,6 +53,7 @@ class HomeWorkUI(QMainWindow):
         self.title()
         self.student_class()
         self.subject()
+        self.duedate()
         self.descrip()
         self.btns()
 
@@ -68,12 +70,12 @@ class HomeWorkUI(QMainWindow):
         with sqlite3.connect("employee.db") as conn:
             cur = conn.cursor()
 
-            cur.execute("SELECT CLASS, SUBJECT, TITLE, HW_ID FROM HW")
+            cur.execute("SELECT CLASS, SUBJECT, DUE_DAY, DUE_MONTH, DUE_YEAR, TITLE, HW_ID FROM HW")
             past_hw = cur.fetchall()
 
         self.past_hw_list = []
-        for assign_class, subject, title, hw_id in past_hw:
-            label = QLabelClicked(f"[{assign_class}:{subject}] {title}")
+        for due_day, due_month, due_year, assign_class, subject, title, hw_id in past_hw:
+            label = QLabelClicked(f"{assign_class} [{subject}:{due_day}{due_month}{due_year}] {title}")
             self.past_hw_list.append([label, hw_id])
             self.vbox.addWidget(label)
 
@@ -156,6 +158,16 @@ class HomeWorkUI(QMainWindow):
         self.vertLayout.addWidget(self.subject_label)
         self.vertLayout.addWidget(self.sub_combo_box)
 
+    def duedate(self):
+        """
+        Adds a Due Date for the Homework
+        """
+        self.label = QLabel("Due Date")
+        self.date = QDateEdit(calendarPopup=True)
+        self.date.setDateTime(QDateTime.currentDateTime())
+        self.vertLayout.addWidget(self.label)
+        self.vertLayout.addWidget(self.date)   
+
     def descrip(self) -> None:
         """
         Add a QTextEdit field to add description of homework
@@ -221,6 +233,7 @@ class HomeWorkCtrl:
 
         if self.view.clear.text() == "New":
             self.view.title_ledit.setEnabled(True)
+            self.view.date.setEnabled(True)
             self.view.class_combo_box.setEnabled(True)
             self.view.sub_combo_box.setEnabled(True)
             self.view.hw_descrip.setEnabled(True)
@@ -236,6 +249,8 @@ class HomeWorkCtrl:
         Gets the current entered text in the fields
         """
         self.title = self.view.title_ledit.text()
+        self.duedate = self.view.date.text()
+        self.day, self.month, self.year = map(lambda x: int(x), self.duedate.split("-"))
         self.hw_class = self.view.class_combo_box.currentText()
         self.subject = self.view.sub_combo_box.currentText()
         self.hw_descrip = self.view.hw_descrip.toPlainText()
@@ -252,23 +267,26 @@ class HomeWorkCtrl:
                 cur = conn.cursor()
                 cur.execute(
                     """ INSERT INTO HW
-                              VALUES(?, ?, ?, ?, ?) """,
+                              VALUES(?, ?, ?, ?, ?, ?, ?, ?) """,
                     (
                         time_ns(),
                         self.title,
                         self.hw_class,
                         self.subject,
+                        self.day,
+                        self.month,
+                        self.year,
                         self.hw_descrip,
                     ),
                 )
 
             # Dynamically adding new homework in scroll area
-                cur.execute("""SELECT HW_ID, TITLE, CLASS, SUBJECT
-                                   FROM HW ORDER BY HW_ID DESC LIMIT 1""")
+                cur.execute("""SELECT HW_ID, TITLE, CLASS, SUBJECT, DUE_DAY, DUE_MONTH, DUE_YEAR
+                                                            FROM HW ORDER BY HW_ID DESC LIMIT 1""")
                 
-                hw_id, title, class_assigned, subject = cur.fetchone()
+                hw_id, title, class_assigned, subject, due_day, due_month, due_year = cur.fetchone()
 
-            label = QLabelClicked(f"[{class_assigned}:{subject}] {title}")
+            label = QLabelClicked(f"{class_assigned} [{subject}:{due_day}-{due_month}-{due_year}] {title}")
             self.view.past_hw_list.append([label, hw_id])
             self.view.vbox.addWidget(label)
             
@@ -282,6 +300,7 @@ class HomeWorkCtrl:
         """
         self.view.title_ledit.setEnabled(True)
         self.view.class_combo_box.setEnabled(True)
+        self.view.date.setEnabled(True)
         self.view.sub_combo_box.setEnabled(True)
         self.view.hw_descrip.setEnabled(True)
 
@@ -304,26 +323,32 @@ class HomeWorkCtrl:
                             SET TITLE = ?,
                                 CLASS = ?,
                                 SUBJECT = ?,
+                                DUE_DAY = ?,
+                                DUE_MONTH = ?,
+                                DUE_YEAR = ?,
                                 DESCRIPTION = ?
                        WHERE HW_ID = ?""",
                     (
                         self.title,
                         self.hw_class,
                         self.subject,
+                        self.day,
+                        self.month,
+                        self.year,
                         self.hw_descrip,
                         hw_id,
                     ),
                 )
 
              # Dynamically updating homework in scroll area
-                cur.execute("""SELECT TITLE, CLASS, SUBJECT
+                cur.execute("""SELECT TITLE, CLASS, SUBJECT, DUE_DAY, DUE_MONTH, DUE_YEAR
                                    FROM HW WHERE HW_ID = ?""", (hw_id,))
                 
-                title, class_assigned, subject = cur.fetchone()
+                title, class_assigned, subject, due_day, due_month, due_year = cur.fetchone()
 
             for i in self.view.past_hw_list:
                 if i[1] == hw_id:
-                    i[0].setText(f"[{class_assigned}:{subject}] {title}")
+                    i[0].setText(f"{class_assigned} [{subject}:{due_day}-{due_month}-{due_year}] {title}")
 
     def get_past_hw(self, hw_id: int) -> Tuple[str, str, str, str]:
         """
@@ -333,7 +358,7 @@ class HomeWorkCtrl:
             cur = conn.cursor()
 
             cur.execute(
-                """SELECT TITLE, CLASS, SUBJECT, DESCRIPTION
+                """SELECT TITLE, CLASS, SUBJECT, DUE_DAY, DUE_MONTH, DUE_YEAR, DESCRIPTION
                            FROM HW
                            WHERE HW_ID = ?""",
                 (hw_id,),
@@ -352,11 +377,13 @@ class HomeWorkCtrl:
         self.view.title_ledit.setText(past_hw_list[0])
         self.view.class_combo_box.setCurrentText(past_hw_list[1])
         self.view.sub_combo_box.setCurrentText(past_hw_list[2])
-        self.view.hw_descrip.setPlainText(past_hw_list[3])
+        self.view.date.setDate(date(past_hw_list[5], past_hw_list[4], past_hw_list[3]))
+        self.view.hw_descrip.setPlainText(past_hw_list[6])
 
         self.view.title_ledit.setEnabled(False)
         self.view.class_combo_box.setEnabled(False)
         self.view.sub_combo_box.setEnabled(False)
+        self.view.date.setEnabled(False)
         self.view.hw_descrip.setEnabled(False)
 
         self.view.ok.setText("Edit")

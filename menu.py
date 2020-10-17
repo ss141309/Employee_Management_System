@@ -49,7 +49,7 @@ class MainUI(QMainWindow):
 
 
 class MainCtrl:
-    def __init__(self,  emp_id: str = "abcd") -> None:
+    def __init__(self,  emp_id: str = "2002") -> None:
         self.app = QApplication(sys.argv)
         self.view = MainUI(emp_id)
         self.set_stylesheet()

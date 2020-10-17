@@ -127,8 +127,7 @@ class DashBoardUI(QMainWindow):
                 (self.emp_id,),
             )
 
-            (
-                self.first_name,
+            (   self.first_name,
                 self.last_name,
                 self.contact,
                 self.email,
