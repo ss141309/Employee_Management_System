@@ -4,6 +4,7 @@ import sys
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedLayout, QWidget
 
+from circular import CircularCtrl
 from hw import HomeWorkCtrl
 from icon_win import icon_taskbar
 from leave import LeaveCtrl
@@ -36,6 +37,9 @@ class MainUI(QMainWindow):
         self.hw = HomeWorkCtrl()
         self.generalLayout.addWidget(self.hw.view._centralWidget)
 
+        self.circular = CircularCtrl()
+        self.generalLayout.addWidget(self.circular.view._centralWidget)
+
         self.leave = LeaveCtrl()
         self.generalLayout.addWidget(self.leave.view._centralWidget)
 
@@ -45,11 +49,12 @@ class MainUI(QMainWindow):
     def connect_toolbar(self) -> None:
         self.tool_bar.dashboard_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(0))
         self.tool_bar.homework_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(1))
-        self.tool_bar.medical_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(2))
+        self.tool_bar.circular_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(2))        
+        self.tool_bar.medical_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(3))
 
 
 class MainCtrl:
-    def __init__(self,  emp_id: str = "2002") -> None:
+    def __init__(self,  emp_id: str = "abcd") -> None:
         self.app = QApplication(sys.argv)
         self.view = MainUI(emp_id)
         self.set_stylesheet()

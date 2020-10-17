@@ -10,7 +10,6 @@ from PyQt5.QtWidgets import (QApplication, QGraphicsScene, QGraphicsView,
                              QVBoxLayout, QWidget)
 
 
-
 class InfoCard(QWidget):
     """
     Custom Widget which displays an icon
@@ -201,7 +200,7 @@ class DashBoardUI(QMainWindow):
         self.classes_assigned_card = InfoCard(
             "resources/chalkboard-teacher.svg",
             "Classes Assigned",
-            "XII-(A, B, C), XI-(A), X-(B)",
+            self.classes,
         )
         self.info_grid.addWidget(self.classes_assigned_card, 1, 2)
 
