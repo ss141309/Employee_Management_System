@@ -16,9 +16,25 @@ class LeaveUI(QMainWindow):
         self.setCentralWidget(self._centralWidget)
         self._centralWidget.setLayout(self.generalLayout)
         self.form = QFormLayout()
-        self.setGeometry(100, 100, 600, 400)
         
         self.leaveinfo()
+        self.btns()
+        self.sub_leave()
+
+    def sub_leave(self):
+
+        self.leave_scroll = QScrollArea()
+        self.widget = QWidget()
+        self.submitted_leave = QLabel("Submitted Leaves :")
+        self.generalLayout.addWidget(self.submitted_leave)
+        self.leave_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        #self.leave_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.leave_scroll.setWidgetResizable(True)
+        self.leave_scroll.setWidget(self.widget)
+
+        self.generalLayout.addWidget(self.leave_scroll, 2)
+        
+
 
     def leaveinfo(self):
 
@@ -34,14 +50,31 @@ class LeaveUI(QMainWindow):
         self.form.addRow(self.label_2, self.date2)
         self.generalLayout.addLayout(self.form)
       
-        self.descrip_label = QLabel("Reason*")
+        self.reason_label = QLabel("Reason*")
 
-        self.hw_descrip = QTextEdit()
+        self.leave_descrip = QTextEdit()
 
-        self.generalLayout.addWidget(self.descrip_label)
-        self.generalLayout.addWidget(self.hw_descrip)
+        self.generalLayout.addWidget(self.reason_label)
+        self.generalLayout.addWidget(self.leave_descrip)
 
+    def btns(self) -> None:
+        """
+        Add buttons to add and clear homework
+        """
+        self.ok = QPushButton()
+        self.clear = QPushButton()
 
+        self.ok.setText("Submit")
+        self.clear.setText("Clear")
+
+        self.empty = QWidget()
+        self.empty.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.hlayout = QHBoxLayout()
+        self.hlayout.addWidget(self.empty)
+        self.hlayout.addWidget(self.ok)
+        self.hlayout.addWidget(self.clear)
+
+        self.generalLayout.addLayout(self.hlayout)
 
 
 class LeaveCtrl:
@@ -50,6 +83,22 @@ class LeaveCtrl:
         self.app = QApplication(sys.argv)
         self.view = LeaveUI()
         self.set_stylesheet()
+        self.connectSignals()
+
+
+    def connectSignals(self) -> None:
+        """
+        Connects signals
+        """
+        self.view.clear.clicked.connect(self.cancel)
+
+    def cancel(self):
+        """
+        Clears text in the field
+        If button is named "New" connects it to the add function
+        """
+
+        self.view.leave_descrip.clear()
 
     def set_stylesheet(self) -> None:
         """ sets the style of widgets according to the stylesheet specified """
