@@ -43,8 +43,9 @@ class MainUI(QMainWindow):
         self.connect_toolbar()
 
     def connect_toolbar(self) -> None:
-        self.tool_bar.homework_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(0))
-        self.tool_bar.medical_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(1))
+        self.tool_bar.dashboard_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(0))
+        self.tool_bar.homework_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(1))
+        self.tool_bar.medical_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(2))
 
 
 class MainCtrl:
