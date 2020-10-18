@@ -124,3 +124,7 @@ QCalendarWidget QTableView
 {
     alternate-background-color:#282a36;  /* day name/week number background */
 }
+
+QScrollArea {
+    border: 1px solid white;
+}

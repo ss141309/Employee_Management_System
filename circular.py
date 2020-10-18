@@ -1,13 +1,16 @@
+import sqlite3
 import sys
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from table import circular_table
+
 
 class CollapsibleBox(QWidget):
-    def __init__(self, title="", parent=None):
-        super(CollapsibleBox, self).__init__(parent)
+    def __init__(self, title: str = "") -> None:
+        super(CollapsibleBox, self).__init__()
 
         self.toggle_button = QToolButton(
             text=title, checkable=True, checked=False
@@ -26,8 +29,8 @@ class CollapsibleBox(QWidget):
         self.content_area.setFrameShape(QFrame.NoFrame)
 
         lay = QVBoxLayout(self)
-        lay.setSpacing(0)
-        lay.setContentsMargins(0, 0, 0, 0)
+        # lay.setSpacing(0)
+        # lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(self.toggle_button)
         lay.addWidget(self.content_area)
 
@@ -42,7 +45,7 @@ class CollapsibleBox(QWidget):
         )
 
     @pyqtSlot()
-    def on_pressed(self):
+    def on_pressed(self) -> None:
         checked = self.toggle_button.isChecked()
         self.toggle_button.setArrowType(
             Qt.DownArrow if not checked else Qt.RightArrow
@@ -54,7 +57,7 @@ class CollapsibleBox(QWidget):
         )
         self.toggle_animation.start()
 
-    def setContentLayout(self, layout):
+    def setContentLayout(self, layout) -> None:
         lay = self.content_area.layout()
         del lay
         self.content_area.setLayout(layout)
@@ -77,16 +80,26 @@ class CollapsibleBox(QWidget):
 
 
 class CircularUI(QMainWindow):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.generalLayout = QVBoxLayout()
         self._centralWidget = QWidget(self)
         self.setCentralWidget(self._centralWidget)
         self._centralWidget.setLayout(self.generalLayout)
 
+        self.search_bar()
         self.collapsible_circular()
 
-    def collapsible_circular(self):
+    def search_bar(self) -> None:
+        self.search_ledit = QLineEdit()
+        self.search_ledit.setPlaceholderText("Search")
+        self.search_ledit.addAction(
+            QIcon("resources/search.svg"), QLineEdit.LeadingPosition
+        )
+
+        self.generalLayout.addWidget(self.search_ledit)
+
+    def collapsible_circular(self) -> None:
         self.scroll_area = QScrollArea()
 
         self.scroll_widget = QWidget()
@@ -95,13 +108,18 @@ class CircularUI(QMainWindow):
         self.scroll_layout = QVBoxLayout()
         self.scroll_widget.setLayout(self.scroll_layout)
 
-        for i in range(10):
-            box = CollapsibleBox(str(i))
+        circular_table()
+        with sqlite3.connect("employee.db") as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM CIRCULAR")
+
+            rows = cur.fetchall()
+
+        for row in rows:
+            box = CollapsibleBox(f"{row[0]} ({row[1]}-{row[2]}-{row[3]})")
             self.scroll_layout.addWidget(box)
             self.content_layout = QVBoxLayout()
-            for j in range(8):
-                label = QLabel("Hello")
-                self.content_layout.addWidget(label)
+            self.content_layout.addWidget(QLabel(f"{row[4]}"))
             box.setContentLayout(self.content_layout)
 
         self.scroll_area.setWidgetResizable(True)
@@ -112,7 +130,39 @@ class CircularCtrl:
     def __init__(self) -> None:
         self.app = QApplication(sys.argv)
         self.view = CircularUI()
+        self.connectSignals()
         self.set_stylesheet()
+
+    def connectSignals(self) -> None:
+        self.view.search_ledit.textChanged.connect(self.search)
+
+    def search(self) -> None:
+        with sqlite3.connect("employee.db") as conn:
+            cur = conn.cursor()
+            cur.execute(
+                """SELECT * FROM CIRCULAR
+                              WHERE TITLE LIKE :query
+                                OR  DESCRIPTION LIKE :query""",
+                {"query": "%" + self.view.search_ledit.text() + "%"},
+            )
+            rows = cur.fetchall()
+
+        try:
+            self.view.scroll_widget.deleteLater()
+        except RuntimeError:
+            pass
+
+        self.scroll_widget = QWidget()
+        self.scroll_layout = QVBoxLayout()
+        for row in rows:
+            box = CollapsibleBox(f"{row[0]} ({row[1]}-{row[2]}-{row[3]})")
+            self.scroll_layout.addWidget(box)
+            self.content_layout = QVBoxLayout()
+            self.content_layout.addWidget(QLabel(f"{row[4]}"))
+            box.setContentLayout(self.content_layout)
+
+        self.scroll_widget.setLayout(self.scroll_layout)
+        self.view.scroll_area.setWidget(self.scroll_widget)
 
     def set_stylesheet(self) -> None:
         """ sets the style of widgets according to the stylesheet specified """
@@ -129,36 +179,3 @@ class CircularCtrl:
 if __name__ == "__main__":
     window = CircularCtrl()
     sys.exit(window.run())
-
-
-# if __name__ == "__main__":
-#     import random
-#     import sys
-
-#     app = QtWidgets.QApplication(sys.argv)
-
-#     w = QtWidgets.QMainWindow()
-#     center = QtWidgets.QWidget()
-#     w.setCentralWidget(center)
-#     vbox = QtWidgets.QVBoxLayout()
-#     center.setLayout(vbox)
-#     scroll = QtWidgets.QScrollArea()
-#     vbox.addWidget(scroll)
-#     content = QtWidgets.QWidget()
-#     scroll.setWidget(content)
-#     scroll.setWidgetResizable(True)
-#     vlay = QtWidgets.QVBoxLayout(content)
-#     for i in range(10):
-#         box = CollapsibleBox(str(i))
-#         vlay.addWidget(box)
-#         lay = QtWidgets.QVBoxLayout()
-#         for j in range(8):
-#             label = QtWidgets.QLabel("Hello")
-#             label.setAlignment(QtCore.Qt.AlignCenter)
-#             lay.addWidget(label)
-
-#         box.setContentLayout(lay)
-#     vlay.addStretch()
-#     w.resize(640, 480)
-#     w.show()
-#     sys.exit(app.exec_())
