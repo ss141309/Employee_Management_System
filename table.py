@@ -30,12 +30,24 @@ def hw_table() -> None:
     with sqlite3.connect("employee.db") as conn:
         conn.execute(
             """ CREATE TABLE IF NOT EXISTS HW(
-                       HW_ID INTEGER PRIMARY KEY,
-                       TITLE TEXT,
-                       CLASS TEXT,
-                       SUBJECT TEXT,
-                       DUE_DAY INT,
-                       DUE_MONTH INT,
-                       DUE_YEAR INT,
-                       DESCRIPTION TEXT)"""
+                       HW_ID          INTEGER PRIMARY KEY,
+                       TITLE          TEXT,
+                       CLASS          TEXT,
+                       SUBJECT        TEXT,
+                       DUE_DAY        INT,
+                       DUE_MONTH      INT,
+                       DUE_YEAR       INT,
+                       DESCRIPTION    TEXT)"""
         )
+
+def circular_table() -> None:
+    with sqlite3.connect("employee.db") as conn:
+        conn.execute(
+            """ CREATE TABLE IF NOT EXISTS CIRCULAR(
+                       TITLE          TEXT,
+                       CIRCULAR_DAY   INT,
+                       CIRCULAR_MONTH INT,
+                       CIRCULAR_YEAR  INT,
+                       DESCRIPTION    TEXT)"""
+            )
+
