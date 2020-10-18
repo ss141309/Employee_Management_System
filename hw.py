@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import (QApplication, QComboBox, QDateEdit, QHBoxLayout,
                              QScrollArea, QSizePolicy, QTextEdit, QVBoxLayout,
                              QWidget)
 
+from PyQt5.QtGui import QTextCharFormat, QBrush
 from table import hw_table
 
 
@@ -180,6 +181,9 @@ class HomeWorkUI(QMainWindow):
         self.label = QLabel("Due Date")
         self.date = QDateEdit(calendarPopup=True)
         self.date.setDateTime(QDateTime.currentDateTime())
+        fmt = QTextCharFormat()
+        fmt.setForeground(QBrush(Qt.white))
+        self.date.calendarWidget().setWeekdayTextFormat(Qt.Saturday, fmt)
         self.vertLayout.addWidget(self.label)
         self.vertLayout.addWidget(self.date)
 

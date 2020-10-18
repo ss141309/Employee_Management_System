@@ -110,3 +110,17 @@ QScrollBar::sub-line:vertical {
 QDateEdit::drop-down{
     image: url('./resources/calendarpopup.svg');
 }
+
+QCalendarWidget QToolButton#qt_calendar_prevmonth 
+{
+    qproperty-icon: url('./resources/arrow-alt-circle-left.svg');
+}
+QCalendarWidget QToolButton#qt_calendar_nextmonth 
+{
+    qproperty-icon: url('./resources/arrow-alt-circle-right.svg');
+}
+
+QCalendarWidget QTableView 
+{
+    alternate-background-color:#282a36;  /* day name/week number background */
+}

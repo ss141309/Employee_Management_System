@@ -1,8 +1,10 @@
 # importing libraries
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
+                             QLineEdit, QMainWindow, QPushButton, QScrollArea,
+                             QSizePolicy, QTextEdit, QVBoxLayout, QWidget, QDateEdit, QFormLayout)
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtGui import QTextCharFormat, QBrush
+from PyQt5.QtCore import Qt, pyqtSignal, QDateTime
 import sys
 from icon_win import icon_taskbar
 
@@ -45,6 +47,11 @@ class LeaveUI(QMainWindow):
         self.date.setDateTime(QtCore.QDateTime.currentDateTime())
         self.date2 = QDateEdit(self,calendarPopup=True)
         self.date2.setDateTime(QtCore.QDateTime.currentDateTime())
+
+        fmt = QTextCharFormat()
+        fmt.setForeground(QBrush(Qt.white))
+        self.date.calendarWidget().setWeekdayTextFormat(Qt.Saturday, fmt)
+        self.date2.calendarWidget().setWeekdayTextFormat(Qt.Saturday, fmt)
 
         self.form.addRow(self.label, self.date)
         self.form.addRow(self.label_2, self.date2)
