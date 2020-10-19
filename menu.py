@@ -16,7 +16,6 @@ class MainUI(QMainWindow):
     """
     Sets up the UI of the Main Window
     """
-
     def __init__(self, emp_id: str) -> None:
         super().__init__()
         self.setWindowIcon(QIcon("resources/icon.svg"))
@@ -47,6 +46,9 @@ class MainUI(QMainWindow):
         self.connect_toolbar()
 
     def connect_toolbar(self) -> None:
+        """
+        opens the correct page for each button clicked
+        """
         self.tool_bar.dashboard_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(0))
         self.tool_bar.homework_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(1))
         self.tool_bar.circular_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(2))        

@@ -1,16 +1,21 @@
 import sqlite3
 import sys
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt5.QtCore import QDateTime, QParallelAnimationGroup, Qt
+from PyQt5.QtGui import QBrush, QIcon, QTextCharFormat
+from PyQt5.QtWidgets import (QApplication, QDateEdit, QFormLayout, QHBoxLayout,
+                             QLabel, QLineEdit, QMainWindow, QPushButton,
+                             QScrollArea, QSizePolicy, QToolButton,
+                             QVBoxLayout, QWidget)
 
 from table import circular_table
 
 
 class CollapsibleBox(QWidget):
-    def __init__(self, title: str = "") -> None:
-        super(CollapsibleBox, self).__init__()
+    def __init__(self, title: str) -> None:
+        super().__init__()
+        self.generalLayout = QVBoxLayout()
+        self.setLayout(self.generalLayout)
 
         self.toggle_button = QToolButton(
             text=title, checkable=True, checked=False
@@ -22,61 +27,75 @@ class CollapsibleBox(QWidget):
 
         self.toggle_animation = QParallelAnimationGroup(self)
 
-        self.content_area = QScrollArea(maximumHeight=0, minimumHeight=0)
+        self.content_area = QScrollArea()
         self.content_area.setSizePolicy(
             QSizePolicy.Expanding, QSizePolicy.Fixed
         )
-        self.content_area.setFrameShape(QFrame.NoFrame)
 
-        lay = QVBoxLayout(self)
-        # lay.setSpacing(0)
-        # lay.setContentsMargins(0, 0, 0, 0)
-        lay.addWidget(self.toggle_button)
-        lay.addWidget(self.content_area)
+        self.generalLayout.addWidget(self.toggle_button)
+        self.generalLayout.addWidget(self.content_area)
 
-        self.toggle_animation.addAnimation(
-            QPropertyAnimation(self, b"minimumHeight")
-        )
-        self.toggle_animation.addAnimation(
-            QPropertyAnimation(self, b"maximumHeight")
-        )
-        self.toggle_animation.addAnimation(
-            QPropertyAnimation(self.content_area, b"maximumHeight")
-        )
-
-    @pyqtSlot()
     def on_pressed(self) -> None:
         checked = self.toggle_button.isChecked()
         self.toggle_button.setArrowType(
             Qt.DownArrow if not checked else Qt.RightArrow
         )
-        self.toggle_animation.setDirection(
-            QAbstractAnimation.Forward
-            if not checked
-            else QAbstractAnimation.Backward
-        )
-        self.toggle_animation.start()
+        if self.content_widget.isVisible():
+            self.content_area.hide()
+        else:
+            self.content_area.show()
 
-    def setContentLayout(self, layout) -> None:
-        lay = self.content_area.layout()
-        del lay
-        self.content_area.setLayout(layout)
-        collapsed_height = (
-            self.sizeHint().height() - self.content_area.maximumHeight()
-        )
-        content_height = layout.sizeHint().height()
-        for i in range(self.toggle_animation.animationCount()):
-            animation = self.toggle_animation.animationAt(i)
-            animation.setDuration(500)
-            animation.setStartValue(collapsed_height)
-            animation.setEndValue(collapsed_height + content_height)
+    def setContent(self, content: str) -> None:
+        self.content = QLabel(content)
+        self.content_layout = QVBoxLayout()
+        self.content_layout.addWidget(self.content)
+        self.content_widget = QWidget()
+        self.content_widget.setLayout(self.content_layout)
+        self.content_area.setWidget(self.content_widget)
+        self.content_area.hide()
 
-        content_animation = self.toggle_animation.animationAt(
-            self.toggle_animation.animationCount() - 1
-        )
-        content_animation.setDuration(500)
-        content_animation.setStartValue(0)
-        content_animation.setEndValue(content_height)
+
+class Filter(QWidget):
+    def __init__(self) -> None:
+        super().__init__()
+        self.generalLayout = QHBoxLayout()
+        self.setLayout(self.generalLayout)
+
+        self.date()
+        self.btn()
+
+    def date(self) -> None:
+        self.form_layout1 = QFormLayout()
+        self.form_layout2 = QFormLayout()
+
+        self.from_label = QLabel("From: ")
+        self.to_label = QLabel("To: ")
+
+        self.date = QDateEdit(calendarPopup=True)
+        self.date.setDateTime(QDateTime.currentDateTime())
+        self.date2 = QDateEdit(self, calendarPopup=True)
+        self.date2.setDateTime(QDateTime.currentDateTime())
+
+        fmt = QTextCharFormat()
+        fmt.setForeground(QBrush(Qt.white))
+        self.date.calendarWidget().setWeekdayTextFormat(Qt.Saturday, fmt)
+        self.date2.calendarWidget().setWeekdayTextFormat(Qt.Saturday, fmt)
+
+        self.form_layout1.addRow(self.from_label, self.date)
+        self.form_layout2.addRow(self.to_label, self.date2)
+
+        self.generalLayout.addLayout(self.form_layout1, 10)
+        self.generalLayout.addLayout(self.form_layout2, 10)
+
+    def btn(self) -> None:
+        self.ok_btn = QPushButton()
+        self.ok_btn.setText("Ok")
+
+        self.clear_btn = QPushButton()
+        self.clear_btn.setText("Clear")
+
+        self.generalLayout.addWidget(self.ok_btn)
+        self.generalLayout.addWidget(self.clear_btn)
 
 
 class CircularUI(QMainWindow):
@@ -93,11 +112,19 @@ class CircularUI(QMainWindow):
     def search_bar(self) -> None:
         self.search_ledit = QLineEdit()
         self.search_ledit.setPlaceholderText("Search")
+
         self.search_ledit.addAction(
             QIcon("resources/search.svg"), QLineEdit.LeadingPosition
         )
+        self.filter_icon = self.search_ledit.addAction(
+            QIcon("resources/filter.svg"), QLineEdit.TrailingPosition
+        )
 
+        self.filter_data = Filter()
         self.generalLayout.addWidget(self.search_ledit)
+        self.generalLayout.addWidget(self.filter_data)
+
+        self.filter_data.hide()
 
     def collapsible_circular(self) -> None:
         self.scroll_area = QScrollArea()
@@ -120,7 +147,7 @@ class CircularUI(QMainWindow):
             self.scroll_layout.addWidget(box)
             self.content_layout = QVBoxLayout()
             self.content_layout.addWidget(QLabel(f"{row[4]}"))
-            box.setContentLayout(self.content_layout)
+            box.setContent(f"{row[4]}")
 
         self.scroll_area.setWidgetResizable(True)
         self.generalLayout.addWidget(self.scroll_area)
@@ -136,13 +163,21 @@ class CircularCtrl:
     def connectSignals(self) -> None:
         self.view.search_ledit.textChanged.connect(self.search)
 
+        self.view.filter_icon.triggered.connect(self.show_filter)
+
+        self.view.filter_data.ok_btn.clicked.connect(self.filter_data)
+        self.view.filter_data.clear_btn.clicked.connect(self.clear_filter)
+
     def search(self) -> None:
         with sqlite3.connect("employee.db") as conn:
             cur = conn.cursor()
             cur.execute(
                 """SELECT * FROM CIRCULAR
-                              WHERE TITLE LIKE :query
-                                OR  DESCRIPTION LIKE :query""",
+                              WHERE  TITLE          LIKE :query
+                                 OR  DESCRIPTION    LIKE :query
+                                 OR  CIRCULAR_DAY   LIKE :query
+                                 OR  CIRCULAR_MONTH LIKE :query
+                                 OR  CIRCULAR_YEAR  LIKE :query""",
                 {"query": "%" + self.view.search_ledit.text() + "%"},
             )
             rows = cur.fetchall()
@@ -157,9 +192,98 @@ class CircularCtrl:
         for row in rows:
             box = CollapsibleBox(f"{row[0]} ({row[1]}-{row[2]}-{row[3]})")
             self.scroll_layout.addWidget(box)
-            self.content_layout = QVBoxLayout()
-            self.content_layout.addWidget(QLabel(f"{row[4]}"))
-            box.setContentLayout(self.content_layout)
+            box.setContent(f"{row[4]}")
+
+        self.scroll_widget.setLayout(self.scroll_layout)
+        self.view.scroll_area.setWidget(self.scroll_widget)
+
+    def show_filter(self) -> None:
+        if self.view.filter_data.isVisible():
+            self.view.filter_data.hide()
+        else:
+            self.view.filter_data.show()
+
+    def filter_data(self) -> None:
+        self.date1 = self.view.filter_data.date.date()
+        self.day1 = self.date1.day()
+        self.month1 = self.date1.month()
+        self.year1 = self.date1.year()
+
+        self.date2 = self.view.filter_data.date2.date()
+        self.day2 = self.date2.day()
+        self.month2 = self.date2.month()
+        self.year2 = self.date2.year()
+
+        print(
+            self.day1,
+            self.month1,
+            self.year1,
+            self.day2,
+            self.month2,
+            self.year2,
+        )
+
+        with sqlite3.connect("employee.db") as conn:
+            cur = conn.cursor()
+            cur.execute(
+                """SELECT * FROM CIRCULAR WHERE
+                                        IIF(:year1 = :year2,
+                                                  IIF(:month1 = :month2,
+                                                           CIRCULAR_DAY   BETWEEN :day1 AND :day2
+                                                       AND CIRCULAR_MONTH BETWEEN :month1 AND :month2
+                                                       AND CIRCULAR_YEAR  BETWEEN :year1 AND :year2,
+
+                                                           CIRCULAR_MONTH BETWEEN :month1 AND :month2
+                                                       AND CIRCULAR_YEAR  BETWEEN :year1  AND  :year2),
+
+                                                  CIRCULAR_YEAR BETWEEN :year1 AND :year2)""",
+                {
+                    "day1": self.day1,
+                    "day2": self.day2,
+                    "month1": self.month1,
+                    "month2": self.month2,
+                    "year1": self.year1,
+                    "year2": self.year2,
+                },
+            )
+            rows = cur.fetchall()
+
+        try:
+            self.view.scroll_widget.deleteLater()
+        except RuntimeError:
+            pass
+
+        self.scroll_widget = QWidget()
+        self.scroll_layout = QVBoxLayout()
+        for row in rows:
+            box = CollapsibleBox(f"{row[0]} ({row[1]}-{row[2]}-{row[3]})")
+            self.scroll_layout.addWidget(box)
+            box.setContent(f"{row[4]}")
+
+        self.scroll_widget.setLayout(self.scroll_layout)
+        self.view.scroll_area.setWidget(self.scroll_widget)
+
+    def clear_filter(self) -> None:
+        # resetting dates
+        self.view.filter_data.date.setDateTime(QDateTime.currentDateTime())
+        self.view.filter_data.date2.setDateTime(QDateTime.currentDateTime())
+
+        with sqlite3.connect("employee.db") as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM CIRCULAR")
+            rows = cur.fetchall()
+
+        try:
+            self.view.scroll_widget.deleteLater()
+        except RuntimeError:
+            pass
+
+        self.scroll_widget = QWidget()
+        self.scroll_layout = QVBoxLayout()
+        for row in rows:
+            box = CollapsibleBox(f"{row[0]} ({row[1]}-{row[2]}-{row[3]})")
+            self.scroll_layout.addWidget(box)
+            box.setContent(f"{row[4]}")
 
         self.scroll_widget.setLayout(self.scroll_layout)
         self.view.scroll_area.setWidget(self.scroll_widget)

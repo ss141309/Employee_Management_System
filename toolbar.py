@@ -2,16 +2,14 @@
 
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (QAction, QActionGroup, QSizePolicy, QToolBar,
-                             QWidget, QMainWindow)
-
+from PyQt5.QtWidgets import (QAction, QActionGroup, QMainWindow, QSizePolicy,
+                             QToolBar, QWidget)
 
 
 class ToolBar(QMainWindow):
     """
     Sets up the ToolBar
     """
-
     def __init__(self) -> None:
         super().__init__()
         self.top_bar()
@@ -21,6 +19,7 @@ class ToolBar(QMainWindow):
         self.toolbar.setIconSize(QSize(100, 100))
         self.toolbar.setFixedHeight(128)
 
+        # setting up buttons to add to the toolbar
         self.dashboard_btn = QAction(QIcon("resources/house-user.svg"), "Overview", self)
         self.student_btn = QAction(QIcon("resources/id-card-alt.svg"), "Students", self)
         self.attendance_btn = QAction(QIcon("resources/calendar-alt.svg"), "Attendance", self)
@@ -28,6 +27,7 @@ class ToolBar(QMainWindow):
         self.circular_btn = QAction(QIcon("resources/newspaper.svg"), "Circular", self)
         self.medical_btn = QAction(QIcon("resources/receipt.svg"), "Apply Leave", self)
 
+        # QActionGroup groups actions together
         self.group = QActionGroup(self)
         self.group.setExclusive(True)
 
@@ -57,4 +57,5 @@ class ToolBar(QMainWindow):
             
         self.toolbar.addSeparator()
         self.toolbar.setMovable(False)
+        self.toolbar.toggleViewAction().setEnabled(False) # disables hiding the toolbar
         self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)

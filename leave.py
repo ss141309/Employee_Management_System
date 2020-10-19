@@ -1,12 +1,16 @@
 # importing libraries
-from PyQt5.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
-                             QLineEdit, QMainWindow, QPushButton, QScrollArea,
-                             QSizePolicy, QTextEdit, QVBoxLayout, QWidget, QDateEdit, QFormLayout)
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtGui import QTextCharFormat, QBrush
-from PyQt5.QtCore import Qt, pyqtSignal, QDateTime
 import sys
+
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtCore import QDateTime, Qt, pyqtSignal
+from PyQt5.QtGui import QBrush, QTextCharFormat
+from PyQt5.QtWidgets import (QApplication, QComboBox, QDateEdit, QFormLayout,
+                             QHBoxLayout, QLabel, QLineEdit, QMainWindow,
+                             QPushButton, QScrollArea, QSizePolicy, QTextEdit,
+                             QVBoxLayout, QWidget)
+
 from icon_win import icon_taskbar
+
 
 class LeaveUI(QMainWindow):
 
@@ -30,7 +34,6 @@ class LeaveUI(QMainWindow):
         self.submitted_leave = QLabel("Submitted Leaves :")
         self.generalLayout.addWidget(self.submitted_leave)
         self.leave_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        #self.leave_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.leave_scroll.setWidgetResizable(True)
         self.leave_scroll.setWidget(self.widget)
 
@@ -40,13 +43,13 @@ class LeaveUI(QMainWindow):
 
     def leaveinfo(self):
 
-        self.label = QLabel("From Date*")
-        self.label_2 = QLabel("To Date*")
+        self.label = QLabel("From Date")
+        self.label_2 = QLabel("To Date")
 
         self.date = QDateEdit(calendarPopup=True)
-        self.date.setDateTime(QtCore.QDateTime.currentDateTime())
+        self.date.setDateTime(QDateTime.currentDateTime())
         self.date2 = QDateEdit(self,calendarPopup=True)
-        self.date2.setDateTime(QtCore.QDateTime.currentDateTime())
+        self.date2.setDateTime(QDateTime.currentDateTime())
 
         fmt = QTextCharFormat()
         fmt.setForeground(QBrush(Qt.white))
@@ -57,7 +60,7 @@ class LeaveUI(QMainWindow):
         self.form.addRow(self.label_2, self.date2)
         self.generalLayout.addLayout(self.form)
       
-        self.reason_label = QLabel("Reason*")
+        self.reason_label = QLabel("Reason")
 
         self.leave_descrip = QTextEdit()
 

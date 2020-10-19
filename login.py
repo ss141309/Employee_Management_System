@@ -16,25 +16,31 @@ from menu import MainCtrl
 
 
 class PasswordEdit(QLineEdit):
-    """ Can toggle password visibility """
+    """ 
+    Can toggle password visibility
+    """
 
     def __init__(self, show_visibility: bool = True) -> None:
         super().__init__()
 
+        # icons for show/hide password
         self.visibleIcon = QIcon("resources/eye.svg")
         self.hiddenIcon = QIcon("resources/hidden.svg")
 
-        self.setEchoMode(QLineEdit.Password)
+        self.setEchoMode(QLineEdit.Password) # to hide the password
 
         if show_visibility:
-            self.togglepasswordAction = self.addAction(self.visibleIcon, QLineEdit.TrailingPosition)
+            self.togglepasswordAction = self.addAction(self.visibleIcon, QLineEdit.TrailingPosition) # adding the visibleIcon to QLineEdit
             self.togglepasswordAction.triggered.connect(self.on_toggle_password_Action)
 
         self.password_shown = False
 
     def on_toggle_password_Action(self) -> None:
+        """
+        Toggles between show/hide password
+        """
         if not self.password_shown:
-            self.setEchoMode(QLineEdit.Normal)
+            self.setEchoMode(QLineEdit.Normal) # show the password
             self.password_shown = True
             self.togglepasswordAction.setIcon(self.hiddenIcon)
         else:
@@ -44,15 +50,16 @@ class PasswordEdit(QLineEdit):
 
 
 class LoginUI(QDialog):
-    """ Sets up the UI of the login Window """
-
+    """ 
+    Sets up the UI of the login Window
+    """
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowIcon(QIcon("resources/icon.svg"))
+        self.setWindowIcon(QIcon("resources/icon.svg")) # setting up taskbar and window icon
         self.setWindowTitle("Login")
-        #self.setFixedSize(1200, 750)
-        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
-        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
+        self.setFixedSize(1200, 750)
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True) # showing minimize button in the window
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True) # showing maximize button in the window
 
         self.generalLayout = QGridLayout()
 
@@ -62,14 +69,13 @@ class LoginUI(QDialog):
         self.entry()
 
     def login_banner(self) -> None:
-        """ Displays the login banner present in the left side of the window """
-
-        frame = QWidget()
-        label_Image = QLabel(frame)
+        """
+        Displays the login banner present in the left side of the window
+        """
+        label_Image = QLabel()
         image_path = "resources/Login.png"  # path to your image file
-        image_profile = QImage(image_path)  # QImage object
-        image_profile = image_profile.scaled(234, 234, aspectRatioMode=Qt.KeepAspectRatio, transformMode=Qt.SmoothTransformation)
-        label_Image.setPixmap(QPixmap.fromImage(image_profile))
+        image_profile = QPixmap(image_path)  # QPixmap object, QPixmap is optimized to display images
+        label_Image.setPixmap(image_profile) # adding the image to the label
 
         self.generalLayout.addWidget(label_Image, 0, 0)
 
@@ -79,7 +85,6 @@ class LoginUI(QDialog):
         QDialogButtonBox buttons to the window and also applies
         spacers to centre these widgets
         """
-
         self.vlayout = QVBoxLayout()
 
         # Welcome Label
@@ -129,7 +134,6 @@ class LoginUI(QDialog):
 
 class LoginCtrl:
     """ Class to control the Login window """
-
     def __init__(self) -> None:
         self.app = QApplication(sys.argv)
         self.view = LoginUI()
@@ -138,6 +142,9 @@ class LoginCtrl:
         self.set_stylesheet()
 
     def connectSignals(self) -> None:
+        """
+        connects signals
+        """
         self.view.buttonBox.accepted.connect(self.accept_creds)
         self.view.buttonBox.rejected.connect(self.reject)
 
@@ -147,6 +154,7 @@ class LoginCtrl:
         Checks if the password entered is correct
         and user id is not left empty
         """
+        # getting the entered text from the id and password line edit
         self.id_entered = self.view.id_ledit.text()
         self.pswd_entered = self.view.paswd_ledit.text()
 
@@ -167,7 +175,7 @@ class LoginCtrl:
         salt makes it more difficult to crack password
         returns the salt and the key
         """
-        if not isinstance(password, bytes):
+        if not isinstance(password, bytes): # checking if password is bytes object or not
             password = password.encode("utf-8")
 
         # n: iterations count
@@ -227,6 +235,6 @@ class LoginCtrl:
 if __name__ == "__main__":
     icon_taskbar()
     window = LoginCtrl()
-    if window.run() == QDialog.Accepted:
+    if window.run() == QDialog.Accepted: # opening the main menu if password is correct
         main_menu = MainCtrl(window.id_entered)
         sys.exit(main_menu.run())

@@ -106,9 +106,14 @@ QScrollBar::sub-line:vertical {
     subcontrol-position: top;
     subcontrol-origin: margin;
 }
-
+QDateEdit
+{
+    background-color: #c2c7d5;
+  	color: black;
+}
 QDateEdit::drop-down{
     image: url('./resources/calendarpopup.svg');
+    background-color: #c2c7d5;
 }
 
 QCalendarWidget QToolButton#qt_calendar_prevmonth 
@@ -124,6 +129,7 @@ QCalendarWidget QTableView
 {
     alternate-background-color:#282a36;  /* day name/week number background */
 }
+
 
 QScrollArea {
     border: 1px solid white;

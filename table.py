@@ -2,6 +2,9 @@ import sqlite3
 
 
 def tables() -> None:
+    """
+    creates table to store employee information
+    """
     with sqlite3.connect("employee.db") as conn:
         conn.execute(
             """ CREATE TABLE IF NOT EXISTS EMPL(
@@ -27,6 +30,9 @@ def tables() -> None:
 
 
 def hw_table() -> None:
+    """
+    creates table to store past hw info
+    """
     with sqlite3.connect("employee.db") as conn:
         conn.execute(
             """ CREATE TABLE IF NOT EXISTS HW(
@@ -41,6 +47,9 @@ def hw_table() -> None:
         )
 
 def circular_table() -> None:
+    """
+    creates table to store circulars
+    """
     with sqlite3.connect("employee.db") as conn:
         conn.execute(
             """ CREATE TABLE IF NOT EXISTS CIRCULAR(

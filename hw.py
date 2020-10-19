@@ -6,12 +6,12 @@ from time import time_ns
 from typing import Tuple
 
 from PyQt5.QtCore import QDateTime, Qt, pyqtSignal
+from PyQt5.QtGui import QBrush, QTextCharFormat
 from PyQt5.QtWidgets import (QApplication, QComboBox, QDateEdit, QHBoxLayout,
                              QLabel, QLineEdit, QMainWindow, QPushButton,
                              QScrollArea, QSizePolicy, QTextEdit, QVBoxLayout,
                              QWidget)
 
-from PyQt5.QtGui import QTextCharFormat, QBrush
 from table import hw_table
 
 
@@ -22,7 +22,7 @@ class QLabelClicked(QLabel):
 
     clicked = pyqtSignal()
 
-    def __init__(self, text=None):
+    def __init__(self, text=None) -> None:
         QLabel.__init__(self, text)
 
         self.setStyleSheet(
@@ -64,11 +64,11 @@ class HomeWorkUI(QMainWindow):
         """
         Creates a scroll area, which displays past homework
         """
-
         self.hw_scroll = QScrollArea()
         self.widget = QWidget()
         self.vbox = QVBoxLayout()
 
+        # getting the past hw from sql table
         hw_table()
         with sqlite3.connect("employee.db") as conn:
             cur = conn.cursor()
@@ -78,8 +78,8 @@ class HomeWorkUI(QMainWindow):
             )
             past_hw = cur.fetchall()
 
+        # displaying the past hw in scroll area as clickable widgets
         self.past_hw_list = []
-
         for (
             assign_class,
             subject,
@@ -100,7 +100,6 @@ class HomeWorkUI(QMainWindow):
         self.hw_scroll.setWidgetResizable(True)
         self.hw_scroll.setWidget(self.widget)
         self.hw_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.hw_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
 
         self.generalLayout.addWidget(self.hw_scroll, 2)
 
@@ -108,7 +107,6 @@ class HomeWorkUI(QMainWindow):
         """
         Add title QLabel and QLineEdit
         """
-
         self.title_label = QLabel("Title")
         self.title_ledit = QLineEdit()
 
@@ -119,7 +117,7 @@ class HomeWorkUI(QMainWindow):
         """
         Add a combobox to select class for homework
         """
-
+        # tuple to be used in combobox
         class_list = (
             "Pre Nursery",
             "Nursery",
@@ -150,6 +148,7 @@ class HomeWorkUI(QMainWindow):
         """
         Add a combobox to add subject to homework
         """
+        # tuple to be used in combobox
         subject_list = (
             "Physics",
             "Chemistry",
@@ -174,16 +173,21 @@ class HomeWorkUI(QMainWindow):
         self.vertLayout.addWidget(self.subject_label)
         self.vertLayout.addWidget(self.sub_combo_box)
 
-    def duedate(self):
+    def duedate(self) -> None:
         """
         Adds a Due Date for the Homework
         """
         self.label = QLabel("Due Date")
+
         self.date = QDateEdit(calendarPopup=True)
         self.date.setDateTime(QDateTime.currentDateTime())
+
         fmt = QTextCharFormat()
         fmt.setForeground(QBrush(Qt.white))
-        self.date.calendarWidget().setWeekdayTextFormat(Qt.Saturday, fmt)
+
+        self.date.calendarWidget().setWeekdayTextFormat(
+            Qt.Saturday, fmt
+        )  # setting Saturday white
         self.vertLayout.addWidget(self.label)
         self.vertLayout.addWidget(self.date)
 
@@ -249,6 +253,7 @@ class HomeWorkCtrl:
         self.view.title_ledit.clear()
         self.view.hw_descrip.clear()
 
+        # if the button's text is "New", reset the fields
         if self.view.clear.text() == "New":
             self.view.title_ledit.setEnabled(True)
             self.view.date.setEnabled(True)
@@ -283,6 +288,7 @@ class HomeWorkCtrl:
         """
         self.get_current_text()
 
+        # inserting the hw in sql table
         if self.title and self.hw_descrip:
             with sqlite3.connect("employee.db") as conn:
                 cur = conn.cursor()
@@ -304,7 +310,7 @@ class HomeWorkCtrl:
                 # Dynamically adding new homework in scroll area
                 cur.execute(
                     """SELECT HW_ID, TITLE, CLASS, SUBJECT, DUE_DAY, DUE_MONTH, DUE_YEAR
-                                                            FROM HW ORDER BY HW_ID DESC LIMIT 1"""
+                                                            FROM HW ORDER BY HW_ID DESC LIMIT 1"""  # only limit to one record
                 )
 
                 (
@@ -323,9 +329,8 @@ class HomeWorkCtrl:
             self.view.past_hw_list.append([label, hw_id])
             self.view.vbox.addWidget(label)
 
-            label.clicked.connect(
-                lambda: self.set_past_ui(hw_id)
-            )  # making the newly added hw clickable
+            # making the newly added hw clickable
+            label.clicked.connect(lambda: self.set_past_ui(hw_id))
 
     def edit(self, hw_id: int) -> None:
         """
@@ -413,13 +418,14 @@ class HomeWorkCtrl:
 
         return row
 
-    def set_past_ui(self, hw_id: int):
+    def set_past_ui(self, hw_id: int) -> None:
         """
         Sets the fields non editable
         Connects to the edit function
         """
         past_hw_list = self.get_past_hw(hw_id)
 
+        # setting the fields with past hw
         self.view.title_ledit.setText(past_hw_list[0])
         self.view.class_combo_box.setCurrentText(past_hw_list[1])
         self.view.sub_combo_box.setCurrentText(past_hw_list[2])
@@ -428,12 +434,14 @@ class HomeWorkCtrl:
         )
         self.view.hw_descrip.setPlainText(past_hw_list[6])
 
+        # settings the fields non-editable
         self.view.title_ledit.setEnabled(False)
         self.view.class_combo_box.setEnabled(False)
         self.view.sub_combo_box.setEnabled(False)
         self.view.date.setEnabled(False)
         self.view.hw_descrip.setEnabled(False)
 
+        # setting buttons text
         self.view.ok.setText("Edit")
         self.view.clear.setText("New")
 
