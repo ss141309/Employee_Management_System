@@ -39,7 +39,7 @@ class MainUI(QMainWindow):
         self.circular = CircularCtrl()
         self.generalLayout.addWidget(self.circular.view._centralWidget)
 
-        self.leave = LeaveCtrl()
+        self.leave = LeaveCtrl(emp_id)
         self.generalLayout.addWidget(self.leave.view._centralWidget)
 
         

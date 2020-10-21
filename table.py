@@ -60,3 +60,20 @@ def circular_table() -> None:
                        DESCRIPTION    TEXT)"""
             )
 
+def leave_table() -> None:
+    """
+    creates table to store leave info
+    """
+    with sqlite3.connect("employee.db") as conn:
+        conn.execute(
+            """ CREATE TABLE IF NOT EXISTS LEAVEINFO(
+                       LI_ID          INTEGER PRIMARY KEY,
+                       TH_ID          TEXT,
+                       FROM_DAY       INT,
+                       FROM_MONTH     INT,
+                       FROM_YEAR      INT,
+                       TO_DAY         INT,
+                       TO_MONTH       INT,
+                       TO_YEAR        INT,
+                       DESCRIPTION    TEXT)"""
+            )
