@@ -126,7 +126,8 @@ class DashBoardUI(QMainWindow):
                 (self.emp_id,),
             )
 
-            (   self.first_name,
+            (
+                self.first_name,
                 self.last_name,
                 self.contact,
                 self.email,
@@ -247,5 +248,5 @@ class DashBoardCtrl:
 
 
 if __name__ == "__main__":
-    window = DashBoardCtrl()
+    window = DashBoardCtrl("abcd")
     sys.exit(window.run())

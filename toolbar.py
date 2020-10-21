@@ -8,24 +8,40 @@ from PyQt5.QtWidgets import (QAction, QActionGroup, QMainWindow, QSizePolicy,
 
 class ToolBar(QMainWindow):
     """
-    Sets up the ToolBar
+    Sets up the toolbar
     """
+
     def __init__(self) -> None:
         super().__init__()
         self.top_bar()
 
     def top_bar(self) -> None:
+        """
+        Sets up the toolbar, and its buttons, sets the buttons checkable and exclusive
+        """
         self.toolbar = QToolBar("My Main Toolbar")
         self.toolbar.setIconSize(QSize(100, 100))
         self.toolbar.setFixedHeight(128)
 
         # setting up buttons to add to the toolbar
-        self.dashboard_btn = QAction(QIcon("resources/house-user.svg"), "Overview", self)
-        self.student_btn = QAction(QIcon("resources/id-card-alt.svg"), "Students", self)
-        self.attendance_btn = QAction(QIcon("resources/calendar-alt.svg"), "Attendance", self)
-        self.homework_btn = QAction(QIcon("resources/book.svg"), "Homework", self)
-        self.circular_btn = QAction(QIcon("resources/newspaper.svg"), "Circular", self)
-        self.medical_btn = QAction(QIcon("resources/receipt.svg"), "Apply Leave", self)
+        self.dashboard_btn = QAction(
+            QIcon("resources/house-user.svg"), "Overview", self
+        )
+        self.student_btn = QAction(
+            QIcon("resources/id-card-alt.svg"), "Students", self
+        )
+        self.attendance_btn = QAction(
+            QIcon("resources/calendar-alt.svg"), "Attendance", self
+        )
+        self.homework_btn = QAction(
+            QIcon("resources/book.svg"), "Homework", self
+        )
+        self.circular_btn = QAction(
+            QIcon("resources/newspaper.svg"), "Circular", self
+        )
+        self.medical_btn = QAction(
+            QIcon("resources/receipt.svg"), "Apply Leave", self
+        )
 
         # QActionGroup groups actions together
         self.group = QActionGroup(self)
@@ -35,12 +51,21 @@ class ToolBar(QMainWindow):
         self.empty_widget_list = []
         for i in range(5):
             empty_widget = QWidget()
-            empty_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+            empty_widget.setSizePolicy(
+                QSizePolicy.Expanding, QSizePolicy.Preferred
+            )
             self.empty_widget_list.append(empty_widget)
 
         # sets the toolbar icons checkable
         self.checkable_btns_list = []
-        for checkable_btns in (self.dashboard_btn, self.student_btn, self.attendance_btn, self.homework_btn, self.circular_btn, self.medical_btn):
+        for checkable_btns in (
+            self.dashboard_btn,
+            self.student_btn,
+            self.attendance_btn,
+            self.homework_btn,
+            self.circular_btn,
+            self.medical_btn,
+        ):
             checkable_btns.setCheckable(True)
             self.checkable_btns_list.append(checkable_btns)
 
@@ -54,8 +79,10 @@ class ToolBar(QMainWindow):
                 self.toolbar.addWidget(self.empty_widget_list[tool_btn])
             except IndexError:
                 break
-            
+
         self.toolbar.addSeparator()
         self.toolbar.setMovable(False)
-        self.toolbar.toggleViewAction().setEnabled(False) # disables hiding the toolbar
+        self.toolbar.toggleViewAction().setEnabled(
+            False
+        )  # disables hiding the toolbar
         self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)

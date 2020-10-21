@@ -1,7 +1,7 @@
 import sqlite3
 import sys
 
-from PyQt5.QtCore import QDateTime, QParallelAnimationGroup, Qt
+from PyQt5.QtCore import QDateTime, Qt
 from PyQt5.QtGui import QBrush, QIcon, QTextCharFormat
 from PyQt5.QtWidgets import (QApplication, QDateEdit, QFormLayout, QHBoxLayout,
                              QLabel, QLineEdit, QMainWindow, QPushButton,
@@ -24,8 +24,6 @@ class CollapsibleBox(QWidget):
         self.toggle_button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.toggle_button.setArrowType(Qt.RightArrow)
         self.toggle_button.pressed.connect(self.on_pressed)
-
-        self.toggle_animation = QParallelAnimationGroup(self)
 
         self.content_area = QScrollArea()
         self.content_area.setSizePolicy(
@@ -65,6 +63,9 @@ class Filter(QWidget):
         self.btn()
 
     def date(self) -> None:
+        """
+        Displays "From" and "To" labels and QDateEdits
+        """
         self.form_layout1 = QFormLayout()
         self.form_layout2 = QFormLayout()
 
@@ -88,6 +89,9 @@ class Filter(QWidget):
         self.generalLayout.addLayout(self.form_layout2, 10)
 
     def btn(self) -> None:
+        """
+        Displays "Ok" and "Clear" button
+        """
         self.ok_btn = QPushButton()
         self.ok_btn.setText("Ok")
 
@@ -110,6 +114,9 @@ class CircularUI(QMainWindow):
         self.collapsible_circular()
 
     def search_bar(self) -> None:
+        """
+        Displays a search bar with search and filter icon
+        """
         self.search_ledit = QLineEdit()
         self.search_ledit.setPlaceholderText("Search")
 
@@ -127,6 +134,9 @@ class CircularUI(QMainWindow):
         self.filter_data.hide()
 
     def collapsible_circular(self) -> None:
+        """
+        Displays circulars in scroll area
+        """
         self.scroll_area = QScrollArea()
 
         self.scroll_widget = QWidget()
@@ -169,6 +179,9 @@ class CircularCtrl:
         self.view.filter_data.clear_btn.clicked.connect(self.clear_filter)
 
     def search(self) -> None:
+        """
+        Searches the circulars for text entered
+        """
         with sqlite3.connect("employee.db") as conn:
             cur = conn.cursor()
             cur.execute(
@@ -198,12 +211,18 @@ class CircularCtrl:
         self.view.scroll_area.setWidget(self.scroll_widget)
 
     def show_filter(self) -> None:
+        """
+        Toggles filter's visibilty
+        """
         if self.view.filter_data.isVisible():
             self.view.filter_data.hide()
         else:
             self.view.filter_data.show()
 
     def filter_data(self) -> None:
+        """
+        Filters according to the date range
+        """
         self.date1 = self.view.filter_data.date.date()
         self.day1 = self.date1.day()
         self.month1 = self.date1.month()
@@ -214,29 +233,19 @@ class CircularCtrl:
         self.month2 = self.date2.month()
         self.year2 = self.date2.year()
 
-        print(
-            self.day1,
-            self.month1,
-            self.year1,
-            self.day2,
-            self.month2,
-            self.year2,
-        )
-
         with sqlite3.connect("employee.db") as conn:
             cur = conn.cursor()
             cur.execute(
                 """SELECT * FROM CIRCULAR WHERE
-                                        IIF(:year1 = :year2,
-                                                  IIF(:month1 = :month2,
-                                                           CIRCULAR_DAY   BETWEEN :day1 AND :day2
-                                                       AND CIRCULAR_MONTH BETWEEN :month1 AND :month2
-                                                       AND CIRCULAR_YEAR  BETWEEN :year1 AND :year2,
+                           IIF(:year1 = :year2,
+                                    IIF(:month1 = :month2,
+                                              CIRCULAR_DAY   BETWEEN :day1 AND :day2
+                                              AND CIRCULAR_MONTH BETWEEN :month1 AND :month2
+                                              AND CIRCULAR_YEAR  BETWEEN :year1 AND :year2,
 
-                                                           CIRCULAR_MONTH BETWEEN :month1 AND :month2
-                                                       AND CIRCULAR_YEAR  BETWEEN :year1  AND  :year2),
-
-                                                  CIRCULAR_YEAR BETWEEN :year1 AND :year2)""",
+                                              CIRCULAR_MONTH BETWEEN :month1 AND :month2
+                                              AND CIRCULAR_YEAR  BETWEEN :year1  AND  :year2),
+                                    CIRCULAR_YEAR BETWEEN :year1 AND :year2)""",
                 {
                     "day1": self.day1,
                     "day2": self.day2,

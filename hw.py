@@ -22,7 +22,7 @@ class QLabelClicked(QLabel):
 
     clicked = pyqtSignal()
 
-    def __init__(self, text=None) -> None:
+    def __init__(self, text: str) -> None:
         QLabel.__init__(self, text)
 
         self.setStyleSheet(
@@ -43,8 +43,9 @@ class HomeWorkUI(QMainWindow):
     Sets up the UI of the HomeWork option
     """
 
-    def __init__(self) -> None:
+    def __init__(self, emp_id: str) -> None:
         super().__init__()
+        self.emp_id = emp_id
         self.generalLayout = QHBoxLayout()
         self._centralWidget = QWidget(self)
         self.setCentralWidget(self._centralWidget)
@@ -74,7 +75,9 @@ class HomeWorkUI(QMainWindow):
             cur = conn.cursor()
 
             cur.execute(
-                "SELECT CLASS, SUBJECT, DUE_DAY, DUE_MONTH, DUE_YEAR, TITLE, HW_ID FROM HW"
+                """SELECT CLASS, SUBJECT, DUE_DAY, DUE_MONTH, DUE_YEAR, TITLE, HW_ID FROM HW
+                        WHERE ASSIGNED_BY = ?""",
+                (self.emp_id,),
             )
             past_hw = cur.fetchall()
 
@@ -229,9 +232,10 @@ class HomeWorkCtrl:
     Controls HomeWorkUI
     """
 
-    def __init__(self) -> None:
+    def __init__(self, emp_id: str) -> None:
+        self.emp_id = emp_id
         self.app = QApplication(sys.argv)
-        self.view = HomeWorkUI()
+        self.view = HomeWorkUI(emp_id)
         self.set_stylesheet()
         self.connectSignals()
 
@@ -294,9 +298,10 @@ class HomeWorkCtrl:
                 cur = conn.cursor()
                 cur.execute(
                     """ INSERT INTO HW
-                              VALUES(?, ?, ?, ?, ?, ?, ?, ?) """,
+                              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?) """,
                     (
                         time_ns(),
+                        self.emp_id,
                         self.title,
                         self.hw_class,
                         self.subject,
@@ -324,7 +329,7 @@ class HomeWorkCtrl:
                 ) = cur.fetchone()
 
             label = QLabelClicked(
-                f"{due_day}-{due_month}-{due_year} [{subject}:{assign_class}] {title}"
+                f"{due_day}-{due_month}-{due_year} [{subject}:{class_assigned}] {title}"
             )
             self.view.past_hw_list.append([label, hw_id])
             self.view.vbox.addWidget(label)

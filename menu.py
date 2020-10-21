@@ -9,6 +9,7 @@ from hw import HomeWorkCtrl
 from icon_win import icon_taskbar
 from leave import LeaveCtrl
 from overview import DashBoardCtrl
+from student import StudentsCtrl
 from toolbar import ToolBar
 
 
@@ -33,7 +34,10 @@ class MainUI(QMainWindow):
         self.ovrvw = DashBoardCtrl(emp_id)
         self.generalLayout.addWidget(self.ovrvw.view._centralWidget)
 
-        self.hw = HomeWorkCtrl()
+        self.student = StudentsCtrl(emp_id)
+        self.generalLayout.addWidget(self.student.view._centralWidget)
+
+        self.hw = HomeWorkCtrl(emp_id)
         self.generalLayout.addWidget(self.hw.view._centralWidget)
 
         self.circular = CircularCtrl()
@@ -50,9 +54,10 @@ class MainUI(QMainWindow):
         opens the correct page for each button clicked
         """
         self.tool_bar.dashboard_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(0))
-        self.tool_bar.homework_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(1))
-        self.tool_bar.circular_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(2))        
-        self.tool_bar.medical_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(3))
+        self.tool_bar.student_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(1))
+        self.tool_bar.homework_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(2))
+        self.tool_bar.circular_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(3))        
+        self.tool_bar.medical_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(4))
 
 
 class MainCtrl:

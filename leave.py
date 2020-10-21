@@ -1,7 +1,9 @@
 # importing libraries
 import sqlite3
 import sys
+from datetime import date
 from time import time_ns
+
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QDateTime, Qt, pyqtSignal
 from PyQt5.QtGui import QBrush, QTextCharFormat
@@ -10,27 +12,61 @@ from PyQt5.QtWidgets import (QApplication, QComboBox, QDateEdit, QFormLayout,
                              QPushButton, QScrollArea, QSizePolicy, QTextEdit,
                              QVBoxLayout, QWidget)
 
+from hw import QLabelClicked
 from icon_win import icon_taskbar
 from table import leave_table
-from hw import QLabelClicked
 
 
 class LeaveUI(QMainWindow):
-
     def __init__(self, emp_id) -> None:
-
         super().__init__()
         self.emp_id = emp_id
         self.generalLayout = QVBoxLayout()
         self._centralWidget = QWidget(self)
         self.setCentralWidget(self._centralWidget)
         self._centralWidget.setLayout(self.generalLayout)
-        self.form = QFormLayout()
-        
-        self.leaveinfo()
+
         self.title()
+        self.leave_dates()
+        self.descrip()
         self.btns()
         self.sub_leave()
+
+    def title(self):
+        self.title_label = QLabel("Title")
+
+        self.title_ledit = QLineEdit()
+
+        self.generalLayout.addWidget(self.title_label)
+        self.generalLayout.addWidget(self.title_ledit)
+
+    def leave_dates(self):
+        self.label = QLabel("From Date")
+        self.label_2 = QLabel("To Date")
+
+        self.date = QDateEdit(calendarPopup=True)
+        self.date.setDateTime(QDateTime.currentDateTime())
+        self.date2 = QDateEdit(calendarPopup=True)
+        self.date2.setDateTime(QDateTime.currentDateTime())
+
+        fmt = QTextCharFormat()
+        fmt.setForeground(QBrush(Qt.white))
+        self.date.calendarWidget().setWeekdayTextFormat(Qt.Saturday, fmt)
+        self.date2.calendarWidget().setWeekdayTextFormat(Qt.Saturday, fmt)
+
+        self.generalLayout.addWidget(self.label)
+        self.generalLayout.addWidget(self.date)
+
+        self.generalLayout.addWidget(self.label_2)
+        self.generalLayout.addWidget(self.date2)
+
+    def descrip(self):
+        self.reason_label = QLabel("Reason")
+
+        self.leave_descrip = QTextEdit()
+
+        self.generalLayout.addWidget(self.reason_label)
+        self.generalLayout.addWidget(self.leave_descrip)
 
     def sub_leave(self):
 
@@ -48,30 +84,29 @@ class LeaveUI(QMainWindow):
             cur = conn.cursor()
 
             cur.execute(
-                """SELECT LI_ID, FROM_DAY, FROM_MONTH, FROM_YEAR, TO_DAY, TO_MONTH, TO_YEAR, DESCRIPTION FROM LEAVEINFO
-                        WHERE TH_ID = ?""", (self.emp_id,)
+                """SELECT LI_ID, TITLE, FROM_DAY, FROM_MONTH, FROM_YEAR, TO_DAY, TO_MONTH, TO_YEAR FROM LEAVEINFO
+                        WHERE TH_ID = ?""",
+                (self.emp_id,),
             )
             sub_leave = cur.fetchall()
-            
 
         # displaying the past leave in scroll area as clickable widget
         self.past_leave_list = []
         for (
             li_id,
+            title,
             from_day,
             from_month,
             from_year,
             to_day,
             to_month,
             to_year,
-            description,
         ) in sub_leave:
             label = QLabelClicked(
-                f"[From: {from_day}-{from_month}-{from_year} -> To:{to_day}-{to_month}-{to_year}] {description}"
+                f"[From: {from_day}-{from_month}-{from_year} -> To:{to_day}-{to_month}-{to_year}] {title}"
             )
             self.past_leave_list.append([label, li_id])
             self.hbox.addWidget(label)
-        
 
         self.generalLayout.addWidget(self.submitted_leave)
         self.leave_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
@@ -79,35 +114,7 @@ class LeaveUI(QMainWindow):
         self.leave_scroll.setWidget(self.widget)
 
         self.generalLayout.addWidget(self.leave_scroll, 2)
-        
-    def title(self):
 
-        self.reason_label = QLabel("Reason")
-
-        self.leave_descrip = QTextEdit()
-
-        self.generalLayout.addWidget(self.reason_label)
-        self.generalLayout.addWidget(self.leave_descrip)
-
-    def leaveinfo(self):
-
-        self.label = QLabel("From Date")
-        self.label_2 = QLabel("To Date")
-
-        self.date = QDateEdit(calendarPopup=True)
-        self.date.setDateTime(QDateTime.currentDateTime())
-        self.date2 = QDateEdit(self,calendarPopup=True)
-        self.date2.setDateTime(QDateTime.currentDateTime())
-
-        fmt = QTextCharFormat()
-        fmt.setForeground(QBrush(Qt.white))
-        self.date.calendarWidget().setWeekdayTextFormat(Qt.Saturday, fmt)
-        self.date2.calendarWidget().setWeekdayTextFormat(Qt.Saturday, fmt)
-
-        self.form.addRow(self.label, self.date)
-        self.form.addRow(self.label_2, self.date2)
-        self.generalLayout.addLayout(self.form)
-      
     def btns(self) -> None:
         """
         Add buttons to add and clear homework
@@ -129,14 +136,13 @@ class LeaveUI(QMainWindow):
 
 
 class LeaveCtrl:
-
     def __init__(self, emp_id) -> None:
         self.emp_id = emp_id
+
         self.app = QApplication(sys.argv)
         self.view = LeaveUI(self.emp_id)
         self.set_stylesheet()
         self.connectSignals()
-
 
     def connectSignals(self) -> None:
         """
@@ -145,13 +151,28 @@ class LeaveCtrl:
         self.view.clear.clicked.connect(self.cancel)
         self.view.ok.clicked.connect(self.add)
 
+        for leave in self.view.past_leave_list:
+            leave[0].clicked.connect(
+                lambda leave=leave: self.set_past_ui(leave[1])
+            )
+
     def cancel(self):
         """
         Clears text in the field
         If button is named "New" connects it to the add function
         """
-
+        self.view.title_ledit.clear()
         self.view.leave_descrip.clear()
+
+        # if the button's text is "New", reset the fields
+        if self.view.clear.text() == "New":
+            self.view.title_ledit.setEnabled(True)
+            self.view.date.setEnabled(True)
+            self.view.date2.setEnabled(True)
+            self.view.leave_descrip.setEnabled(True)
+            self.view.ok.setEnabled(True)
+
+            self.view.clear.setText("Clear")
 
     def get_current_text(self):
 
@@ -165,6 +186,7 @@ class LeaveCtrl:
         self.month1 = self.leaveinfo.month()
         self.year1 = self.leaveinfo.year()
 
+        self.title = self.view.title_ledit.text()
         self.leave_descrip = self.view.leave_descrip.toPlainText()
 
     def add(self):
@@ -173,16 +195,17 @@ class LeaveCtrl:
         """
         self.get_current_text()
 
-        #inserting the leave in sql table
-        if self.leaveinfo and self.leaveinfo2 and self.leave_descrip:
+        # inserting the leave in sql table
+        if self.title and self.leave_descrip:
             with sqlite3.connect("employee.db") as conn:
                 cur = conn.cursor()
                 cur.execute(
                     """ INSERT INTO LEAVEINFO
-                              VALUES(?,?,?,?,?,?,?,?,?) """,
+                              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?) """,
                     (
                         time_ns(),
                         self.emp_id,
+                        self.title,
                         self.day,
                         self.month,
                         self.year,
@@ -195,45 +218,69 @@ class LeaveCtrl:
 
                 # Dynamically adding new leave in scroll area
                 cur.execute(
-                    """SELECT LI_ID, TH_ID, FROM_DAY, FROM_MONTH, FROM_YEAR, TO_DAY, TO_MONTH, TO_YEAR, DESCRIPTION
+                    """SELECT LI_ID, TITLE, FROM_DAY, FROM_MONTH, FROM_YEAR, TO_DAY, TO_MONTH, TO_YEAR
                                                                             FROM LEAVEINFO ORDER BY LI_ID DESC LIMIT 1"""
                 )
 
                 (
                     li_id,
-                    emp_id,
+                    title,
                     from_day,
                     from_month,
                     from_year,
                     to_day,
                     to_month,
                     to_year,
-                    description,
-                    
                 ) = cur.fetchone()
             label = QLabelClicked(
-                f"[{from_day}{from_month}{from_year}:{to_day}{to_month}{to_year}] {description}"
+                f"[From: {from_day}-{from_month}-{from_year} -> To: {to_day}-{to_month}-{to_year}] {title}"
             )
-            self.view.past_leave_list.append([label,li_id])
+            self.view.past_leave_list.append([label, li_id])
             self.view.hbox.addWidget(label)
 
             # making the newly added leave clickable
+            label.clicked.connect(lambda: self.set_past_ui(leave_id))
 
-    
-    def get_past_leave(self, emp_id: int):
+    def get_past_leave(self, li_id: int):
 
         with sqlite3.connect("employee.db") as conn:
             cur = conn.cursor()
 
             cur.execute(
-                 """SELECT LI_ID, TH_ID, FROM_DAY, FROM_MONTH, FROM_YEAR, TO_DAY, TO_MONTH, TO_YEAR, DESCRIPTION
+                """SELECT TITLE, FROM_DAY, FROM_MONTH, FROM_YEAR, TO_DAY, TO_MONTH, TO_YEAR, DESCRIPTION
                            FROM LEAVEINFO
-                           WHERE TH_ID = ?""",
-                (self.emp_id,),
+                           WHERE LI_ID = ?""",
+                (li_id,),
             )
             row = cur.fetchone()
-            print(row)
+            return row
 
+    def set_past_ui(self, li_id: int) -> None:
+        """
+        Sets the fields non editable
+        Connects to the edit function
+        """
+        past_leave_list = self.get_past_leave(li_id)
+
+        # setting the fields with past hw
+        self.view.title_ledit.setText(past_leave_list[0])
+        self.view.date.setDate(
+            date(past_leave_list[3], past_leave_list[2], past_leave_list[1])
+        )
+        self.view.date2.setDate(
+            date(past_leave_list[6], past_leave_list[5], past_leave_list[4])
+        )
+        self.view.leave_descrip.setPlainText(past_leave_list[7])
+
+        # settings the fields non-editable
+        self.view.title_ledit.setEnabled(False)
+        self.view.date.setEnabled(False)
+        self.view.date2.setEnabled(False)
+        self.view.leave_descrip.setEnabled(False)
+        self.view.ok.setEnabled(False)
+
+        # setting buttons text
+        self.view.clear.setText("New")
 
     def set_stylesheet(self) -> None:
         """ sets the style of widgets according to the stylesheet specified """
