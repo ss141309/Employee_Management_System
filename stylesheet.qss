@@ -134,3 +134,8 @@ QCalendarWidget QTableView
 QScrollArea {
     border: 1px solid white;
 }
+
+QSpinBox {
+    background-color: #c2c7d5;
+    color: #282a36;
+}

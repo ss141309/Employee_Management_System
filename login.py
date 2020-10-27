@@ -6,10 +6,10 @@ import sys
 from typing import Tuple, Union
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QIcon, QImage, QPixmap
+from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import (QApplication, QDialog, QDialogButtonBox,
                              QGridLayout, QLabel, QLineEdit, QSizePolicy,
-                             QSpacerItem, QVBoxLayout, QWidget)
+                             QSpacerItem, QVBoxLayout)
 
 from icon_win import icon_taskbar
 from menu import MainCtrl
@@ -66,11 +66,8 @@ class LoginUI(QDialog):
         self.setWindowTitle("Login")
         self.setFixedSize(1200, 750)
         self.setWindowFlag(
-            Qt.WindowMinimizeButtonHint, True
-        )  # showing minimize button in the window
-        self.setWindowFlag(
-            Qt.WindowMaximizeButtonHint, True
-        )  # showing maximize button in the window
+            Qt.WindowMinMaxButtonsHint, True
+        )  # showing minimize and maximize buttons in the window
 
         self.generalLayout = QGridLayout()
 
@@ -85,9 +82,8 @@ class LoginUI(QDialog):
         """
         label_Image = QLabel()
         image_path = "resources/Login.png"  # path to your image file
-        image_profile = QPixmap(
-            image_path
-        )  # QPixmap object, QPixmap is optimized to display images
+        # QPixmap object, QPixmap is optimized to display images
+        image_profile = QPixmap(image_path)
         label_Image.setPixmap(image_profile)  # adding the image to the label
 
         self.generalLayout.addWidget(label_Image, 0, 0)

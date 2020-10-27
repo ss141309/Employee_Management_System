@@ -17,11 +17,12 @@ class MainUI(QMainWindow):
     """
     Sets up the UI of the Main Window
     """
+
     def __init__(self, emp_id: str) -> None:
         super().__init__()
         self.setWindowIcon(QIcon("resources/icon.svg"))
         self.setWindowTitle("Main Menu")
-        self.setGeometry(100, 100, 1200, 750)
+        self.setGeometry(100, 100, 1500, 750)
 
         self.generalLayout = QStackedLayout()
         self._centralWidget = QWidget(self)
@@ -46,22 +47,31 @@ class MainUI(QMainWindow):
         self.leave = LeaveCtrl(emp_id)
         self.generalLayout.addWidget(self.leave.view._centralWidget)
 
-        
         self.connect_toolbar()
 
     def connect_toolbar(self) -> None:
         """
         opens the correct page for each button clicked
         """
-        self.tool_bar.dashboard_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(0))
-        self.tool_bar.student_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(1))
-        self.tool_bar.homework_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(2))
-        self.tool_bar.circular_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(3))        
-        self.tool_bar.medical_btn.triggered.connect(lambda: self.generalLayout.setCurrentIndex(4))
+        self.tool_bar.dashboard_btn.triggered.connect(
+            lambda: self.generalLayout.setCurrentIndex(0)
+        )
+        self.tool_bar.student_btn.triggered.connect(
+            lambda: self.generalLayout.setCurrentIndex(1)
+        )
+        self.tool_bar.homework_btn.triggered.connect(
+            lambda: self.generalLayout.setCurrentIndex(2)
+        )
+        self.tool_bar.circular_btn.triggered.connect(
+            lambda: self.generalLayout.setCurrentIndex(3)
+        )
+        self.tool_bar.medical_btn.triggered.connect(
+            lambda: self.generalLayout.setCurrentIndex(4)
+        )
 
 
 class MainCtrl:
-    def __init__(self,  emp_id: str = "abcd") -> None:
+    def __init__(self, emp_id: str = "abcd") -> None:
         self.app = QApplication(sys.argv)
         self.view = MainUI(emp_id)
         self.set_stylesheet()

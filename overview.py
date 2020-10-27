@@ -112,13 +112,9 @@ class DashBoardUI(QMainWindow):
                            LAST_NAME,
                            CONTACT,
                            EMAIL,
-                           DOB_DAY,
-                           DOB_MONTH,
-                           DOB_YEAR,
-                           JOINING_DAY,
-                           JOINING_MONTH,
-                           JOINING_YEAR,
-                           CLASSES_ASSIGNED,
+                           DOB,
+                           JOIN_DATE,
+                           CLASSES,
                            SUBJECTS,
                            BUS_ROUTE,
                            ADDRESS
@@ -131,12 +127,8 @@ class DashBoardUI(QMainWindow):
                 self.last_name,
                 self.contact,
                 self.email,
-                self.dob_day,
-                self.dob_month,
-                self.dob_year,
-                self.join_day,
-                self.join_month,
-                self.join_year,
+                self.dob,
+                self.join_date,
                 self.classes,
                 self.subjects,
                 self.bus,
@@ -187,14 +179,14 @@ class DashBoardUI(QMainWindow):
         self.dob_card = InfoCard(
             "resources/calendar-day.svg",
             "Date of Birth",
-            f"{self.dob_day}-{self.dob_month}-{self.dob_year}",
+            self.dob,
         )
         self.info_grid.addWidget(self.dob_card, 1, 0)
 
         self.joining_date_card = InfoCard(
             "resources/calendar-alt.svg",
             "Joining Date",
-            f"{self.join_day}-{self.join_month}-{self.join_year}",
+            self.join_date,
         )
         self.info_grid.addWidget(self.joining_date_card, 1, 1)
 

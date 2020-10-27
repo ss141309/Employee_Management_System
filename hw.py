@@ -75,7 +75,7 @@ class HomeWorkUI(QMainWindow):
             cur = conn.cursor()
 
             cur.execute(
-                """SELECT CLASS, SUBJECT, DUE_DAY, DUE_MONTH, DUE_YEAR, TITLE, HW_ID FROM HW
+                """SELECT CLASS, SUBJECT, DUE_DATE, TITLE, HW_ID FROM HW
                         WHERE ASSIGNED_BY = ?""",
                 (self.emp_id,),
             )
@@ -86,14 +86,12 @@ class HomeWorkUI(QMainWindow):
         for (
             assign_class,
             subject,
-            due_day,
-            due_month,
-            due_year,
+            due_date,
             title,
             hw_id,
         ) in past_hw:
             label = QLabelClicked(
-                f"{due_day}-{due_month}-{due_year} [{subject}:{assign_class}] {title}"
+                f"{due_date} [{subject}:{assign_class}] {title}"
             )
             self.past_hw_list.append([label, hw_id])
             self.vbox.addWidget(label)
@@ -256,6 +254,7 @@ class HomeWorkCtrl:
         """
         self.view.title_ledit.clear()
         self.view.hw_descrip.clear()
+        self.view.date.setDateTime(QDateTime.currentDateTime())
 
         # if the button's text is "New", reset the fields
         if self.view.clear.text() == "New":
@@ -298,23 +297,21 @@ class HomeWorkCtrl:
                 cur = conn.cursor()
                 cur.execute(
                     """ INSERT INTO HW
-                              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?) """,
+                              VALUES(?, ?, ?, ?, ?, ?, ?) """,
                     (
                         time_ns(),
                         self.emp_id,
                         self.title,
                         self.hw_class,
                         self.subject,
-                        self.day,
-                        self.month,
-                        self.year,
+                        f"{self.day}-{self.month}-{self.year}",
                         self.hw_descrip,
                     ),
                 )
 
                 # Dynamically adding new homework in scroll area
                 cur.execute(
-                    """SELECT HW_ID, TITLE, CLASS, SUBJECT, DUE_DAY, DUE_MONTH, DUE_YEAR
+                    """SELECT HW_ID, TITLE, CLASS, SUBJECT, DUE_DATE
                                                             FROM HW ORDER BY HW_ID DESC LIMIT 1"""  # only limit to one record
                 )
 
@@ -323,13 +320,11 @@ class HomeWorkCtrl:
                     title,
                     class_assigned,
                     subject,
-                    due_day,
-                    due_month,
-                    due_year,
+                    due_date,
                 ) = cur.fetchone()
 
             label = QLabelClicked(
-                f"{due_day}-{due_month}-{due_year} [{subject}:{class_assigned}] {title}"
+                f"{due_date} [{subject}:{class_assigned}] {title}"
             )
             self.view.past_hw_list.append([label, hw_id])
             self.view.vbox.addWidget(label)
@@ -367,18 +362,14 @@ class HomeWorkCtrl:
                             SET TITLE = ?,
                                 CLASS = ?,
                                 SUBJECT = ?,
-                                DUE_DAY = ?,
-                                DUE_MONTH = ?,
-                                DUE_YEAR = ?,
+                                DUE_DATE = ?,
                                 DESCRIPTION = ?
                        WHERE HW_ID = ?""",
                     (
                         self.title,
                         self.hw_class,
                         self.subject,
-                        self.day,
-                        self.month,
-                        self.year,
+                        f"{self.day}-{self.month}-{self.year}",
                         self.hw_descrip,
                         hw_id,
                     ),
@@ -386,7 +377,7 @@ class HomeWorkCtrl:
 
                 # Dynamically updating homework in scroll area
                 cur.execute(
-                    """SELECT TITLE, CLASS, SUBJECT, DUE_DAY, DUE_MONTH, DUE_YEAR
+                    """SELECT TITLE, CLASS, SUBJECT, DUE_DATE
                                    FROM HW WHERE HW_ID = ?""",
                     (hw_id,),
                 )
@@ -395,15 +386,13 @@ class HomeWorkCtrl:
                     title,
                     class_assigned,
                     subject,
-                    due_day,
-                    due_month,
-                    due_year,
+                    due_date,
                 ) = cur.fetchone()
 
             for i in self.view.past_hw_list:
                 if i[1] == hw_id:
                     i[0].setText(
-                        f"{due_day}-{due_month}-{due_year} [{subject}:{class_assigned}] {title}"
+                        f"{due_date} [{subject}:{class_assigned}] {title}"
                     )
 
     def get_past_hw(self, hw_id: int) -> Tuple[str, str, str, str]:
@@ -414,7 +403,7 @@ class HomeWorkCtrl:
             cur = conn.cursor()
 
             cur.execute(
-                """SELECT TITLE, CLASS, SUBJECT, DUE_DAY, DUE_MONTH, DUE_YEAR, DESCRIPTION
+                """SELECT TITLE, CLASS, SUBJECT, DUE_DATE, DESCRIPTION
                            FROM HW
                            WHERE HW_ID = ?""",
                 (hw_id,),
@@ -429,15 +418,14 @@ class HomeWorkCtrl:
         Connects to the edit function
         """
         past_hw_list = self.get_past_hw(hw_id)
+        due_date = [int(x) for x in past_hw_list[3].split("-")]
 
         # setting the fields with past hw
         self.view.title_ledit.setText(past_hw_list[0])
         self.view.class_combo_box.setCurrentText(past_hw_list[1])
         self.view.sub_combo_box.setCurrentText(past_hw_list[2])
-        self.view.date.setDate(
-            date(past_hw_list[5], past_hw_list[4], past_hw_list[3])
-        )
-        self.view.hw_descrip.setPlainText(past_hw_list[6])
+        self.view.date.setDate(date(due_date[2], due_date[1], due_date[0]))
+        self.view.hw_descrip.setPlainText(past_hw_list[4])
 
         # settings the fields non-editable
         self.view.title_ledit.setEnabled(False)

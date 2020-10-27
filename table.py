@@ -15,13 +15,9 @@ def tables() -> None:
                         SALT                  BLOB,
                         CONTACT               TEXT,
                         EMAIL                 TEXT,
-                        DOB_DAY               INT,
-                        DOB_MONTH             TEXT,
-                        DOB_YEAR              INT,
-                        JOINING_DAY           INT,
-                        JOINING_MONTH         TEXT,
-                        JOINING_YEAR          INT,
-                        CLASSES_ASSIGNED      TEXT,
+                        DOB                   TEXT,
+                        JOIN_DATE             TEXT,
+                        CLASSES               TEXT,
                         SUBJECTS              TEXT,
                         BUS_ROUTE             TEXT,
                         ADDRESS               TEXT
@@ -41,9 +37,7 @@ def hw_table() -> None:
                        TITLE          TEXT,
                        CLASS          TEXT,
                        SUBJECT        TEXT,
-                       DUE_DAY        INT,
-                       DUE_MONTH      INT,
-                       DUE_YEAR       INT,
+                       DUE_DATE       TEXT,
                        DESCRIPTION    TEXT)"""
         )
 
@@ -56,9 +50,7 @@ def circular_table() -> None:
         conn.execute(
             """ CREATE TABLE IF NOT EXISTS CIRCULAR(
                        TITLE          TEXT,
-                       CIRCULAR_DAY   INT,
-                       CIRCULAR_MONTH INT,
-                       CIRCULAR_YEAR  INT,
+                       CIRCULAR_DATE  TEXT,
                        DESCRIPTION    TEXT)"""
         )
 
@@ -73,12 +65,8 @@ def leave_table() -> None:
                        LI_ID          INTEGER PRIMARY KEY,
                        TH_ID          TEXT,
                        TITLE          TEXT,
-                       FROM_DAY       INT,
-                       FROM_MONTH     INT,
-                       FROM_YEAR      INT,
-                       TO_DAY         INT,
-                       TO_MONTH       INT,
-                       TO_YEAR        INT,
+                       FROM_DATE      TEXT,
+                       TO_DATE        TEXT,
                        DESCRIPTION    TEXT)"""
         )
 
@@ -94,15 +82,12 @@ def student_table() -> None:
                       FIRST_NAME TEXT,
                       LAST_NAME TEXT,
                       GENDER TEXT,
-                      DOB_DAY INT,
-                      DOB_MONTH INT,
-                      DOB_YEAR INT,
-                      JOINING_DAY INT,
-                      JOINING_MONTH INT,
-                      JOINING_YEAR INT,
+                      DOB    TEXT,
+                      JOIN_DATE TEXT,
                       CLASS TEXT,
                       HOUSE TEXT,
                       ROLL_NO INT,
+                      BUS_ROUTE TEXT,
                       EMAIL TEXT,
                       CONTACT TEXT,
                       ADDRESS TEXT) """

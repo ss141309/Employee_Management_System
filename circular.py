@@ -153,11 +153,12 @@ class CircularUI(QMainWindow):
             rows = cur.fetchall()
 
         for row in rows:
-            box = CollapsibleBox(f"{row[0]} ({row[1]}-{row[2]}-{row[3]})")
+            year, month, day = row[1].split("-")
+            box = CollapsibleBox(f"{row[0]} ({day}-{month}-{year})")
             self.scroll_layout.addWidget(box)
             self.content_layout = QVBoxLayout()
-            self.content_layout.addWidget(QLabel(f"{row[4]}"))
-            box.setContent(f"{row[4]}")
+            self.content_layout.addWidget(QLabel(f"{row[2]}"))
+            box.setContent(f"{row[2]}")
 
         self.scroll_area.setWidgetResizable(True)
         self.generalLayout.addWidget(self.scroll_area)
@@ -188,9 +189,7 @@ class CircularCtrl:
                 """SELECT * FROM CIRCULAR
                               WHERE  TITLE          LIKE :query
                                  OR  DESCRIPTION    LIKE :query
-                                 OR  CIRCULAR_DAY   LIKE :query
-                                 OR  CIRCULAR_MONTH LIKE :query
-                                 OR  CIRCULAR_YEAR  LIKE :query""",
+                                 OR  CIRCULAR_DATE  LIKE :query""",
                 {"query": "%" + self.view.search_ledit.text() + "%"},
             )
             rows = cur.fetchall()
@@ -203,9 +202,10 @@ class CircularCtrl:
         self.scroll_widget = QWidget()
         self.scroll_layout = QVBoxLayout()
         for row in rows:
-            box = CollapsibleBox(f"{row[0]} ({row[1]}-{row[2]}-{row[3]})")
+            year, month, day = row[1].split("-")
+            box = CollapsibleBox(f"{row[0]} ({day}-{month}-{year})")
             self.scroll_layout.addWidget(box)
-            box.setContent(f"{row[4]}")
+            box.setContent(f"{row[2]}")
 
         self.scroll_widget.setLayout(self.scroll_layout)
         self.view.scroll_area.setWidget(self.scroll_widget)
@@ -223,37 +223,16 @@ class CircularCtrl:
         """
         Filters according to the date range
         """
-        self.date1 = self.view.filter_data.date.date()
-        self.day1 = self.date1.day()
-        self.month1 = self.date1.month()
-        self.year1 = self.date1.year()
+        self.date1 = self.view.filter_data.date.date().toPyDate
 
-        self.date2 = self.view.filter_data.date2.date()
-        self.day2 = self.date2.day()
-        self.month2 = self.date2.month()
-        self.year2 = self.date2.year()
+        self.date2 = self.view.filter_data.date2.date().toPyDate
 
         with sqlite3.connect("employee.db") as conn:
             cur = conn.cursor()
             cur.execute(
-                """SELECT * FROM CIRCULAR WHERE
-                           IIF(:year1 = :year2,
-                                    IIF(:month1 = :month2,
-                                              CIRCULAR_DAY   BETWEEN :day1 AND :day2
-                                              AND CIRCULAR_MONTH BETWEEN :month1 AND :month2
-                                              AND CIRCULAR_YEAR  BETWEEN :year1 AND :year2,
-
-                                              CIRCULAR_MONTH BETWEEN :month1 AND :month2
-                                              AND CIRCULAR_YEAR  BETWEEN :year1  AND  :year2),
-                                    CIRCULAR_YEAR BETWEEN :year1 AND :year2)""",
-                {
-                    "day1": self.day1,
-                    "day2": self.day2,
-                    "month1": self.month1,
-                    "month2": self.month2,
-                    "year1": self.year1,
-                    "year2": self.year2,
-                },
+                """SELECT * FROM CIRCULAR
+                          WHERE CIRCULAR_DATE BETWEEN ? AND ?""",
+                (self.date1(), self.date2()),
             )
             rows = cur.fetchall()
 
@@ -265,9 +244,10 @@ class CircularCtrl:
         self.scroll_widget = QWidget()
         self.scroll_layout = QVBoxLayout()
         for row in rows:
-            box = CollapsibleBox(f"{row[0]} ({row[1]}-{row[2]}-{row[3]})")
+            year, month, day = row[1].split("-")
+            box = CollapsibleBox(f"{row[0]} ({day}-{month}-{year})")
             self.scroll_layout.addWidget(box)
-            box.setContent(f"{row[4]}")
+            box.setContent(f"{row[2]}")
 
         self.scroll_widget.setLayout(self.scroll_layout)
         self.view.scroll_area.setWidget(self.scroll_widget)
@@ -290,9 +270,10 @@ class CircularCtrl:
         self.scroll_widget = QWidget()
         self.scroll_layout = QVBoxLayout()
         for row in rows:
-            box = CollapsibleBox(f"{row[0]} ({row[1]}-{row[2]}-{row[3]})")
+            year, month, day = row[1].split("-")
+            box = CollapsibleBox(f"{row[0]} ({day}-{month}-{year})")
             self.scroll_layout.addWidget(box)
-            box.setContent(f"{row[4]}")
+            box.setContent(f"{row[2]}")
 
         self.scroll_widget.setLayout(self.scroll_layout)
         self.view.scroll_area.setWidget(self.scroll_widget)
