@@ -139,3 +139,11 @@ QSpinBox {
     background-color: #c2c7d5;
     color: #282a36;
 }
+
+QHeaderView::Section {
+    background: #373844;
+}
+
+QTableWidget QTableCornerButton::Section {
+    background: #373844;
+}

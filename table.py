@@ -90,5 +90,8 @@ def student_table() -> None:
                       BUS_ROUTE TEXT,
                       EMAIL TEXT,
                       CONTACT TEXT,
-                      ADDRESS TEXT) """
+                      ADDRESS TEXT
+                      ATTENDACE INT,
+                      DAYS_PRESENT INT,
+                      TOTAL_WORKING_DAYS INT) """
         )

@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedLayout, QWidget
 
 from circular import CircularCtrl
 from hw import HomeWorkCtrl
+from attendance import AttendanceCtrl
 from icon_win import icon_taskbar
 from leave import LeaveCtrl
 from overview import DashBoardCtrl
@@ -47,6 +48,9 @@ class MainUI(QMainWindow):
         self.leave = LeaveCtrl(emp_id)
         self.generalLayout.addWidget(self.leave.view._centralWidget)
 
+        self.attendace = AttendanceCtrl(emp_id)
+        self.generalLayout.addWidget(self.attendace.view._centralWidget)
+
         self.connect_toolbar()
 
     def connect_toolbar(self) -> None:
@@ -67,6 +71,9 @@ class MainUI(QMainWindow):
         )
         self.tool_bar.medical_btn.triggered.connect(
             lambda: self.generalLayout.setCurrentIndex(4)
+        )
+        self.tool_bar.attendance_btn.triggered.connect(
+            lambda: self.generalLayout.setCurrentIndex(5)
         )
 
 
