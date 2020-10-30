@@ -93,5 +93,21 @@ def student_table() -> None:
                       ADDRESS TEXT
                       ATTENDACE INT,
                       DAYS_PRESENT INT,
-                      TOTAL_WORKING_DAYS INT) """
+                      TOTAL_WORKING_DAYS INT,
+                      DAYS_JAN INT,
+                      DAYS_FEB INT,
+                      DAYS_MAR INT,
+                      DAYS_APR INT,
+                      DAYS_MAY INT,
+                      DAYS_JUN INT,
+                      DAYS_JUL INT,
+                      DAYS_AUG INT,
+                      DAYS_SEPT INT,
+                      DAYS_OCT INT,
+                      DAYS_NOV INT,
+                      DAYS_DEC INT,
+                      T28_DAYS INT,
+                      T30_DAYS INT,
+                      T31_DAYS INT) """
+
         )
