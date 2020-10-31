@@ -241,7 +241,7 @@ class LeaveCtrl:
             self.view.hbox.addWidget(label)
 
             # making the newly added leave clickable
-            label.clicked.connect(lambda: self.set_past_ui(leave_id))
+            label.clicked.connect(lambda: self.set_past_ui(li_id))
 
     def get_past_leave(self, li_id: int) -> Tuple[str, str, str, str]:
         """

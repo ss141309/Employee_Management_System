@@ -4,13 +4,12 @@ from typing import Tuple
 
 from PyQt5.QtChart import (QBarCategoryAxis, QBarSeries, QBarSet, QChart,
                            QChartView, QPieSeries, QPieSlice, QValueAxis)
-from PyQt5.QtCore import QDateTime, Qt
-from PyQt5.QtGui import QBrush, QFont, QIcon, QImage, QPainter, QPen, QPixmap
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon, QPainter, QPen
 from PyQt5.QtWidgets import (QApplication, QGridLayout, QHBoxLayout,
-                             QHeaderView, QLabel, QLineEdit, QMainWindow,
-                             QPushButton, QSizePolicy, QStackedWidget,
-                             QTableWidget, QTableWidgetItem, QVBoxLayout,
-                             QWidget)
+                             QHeaderView, QLineEdit, QMainWindow, QPushButton,
+                             QStackedWidget, QTableWidget, QTableWidgetItem,
+                             QVBoxLayout, QWidget)
 
 
 class AttendanceUI(QMainWindow):
@@ -33,7 +32,6 @@ class AttendanceUI(QMainWindow):
         self.get_classes()
         self.search_bar()
         self.view_students()
-        
 
     def get_classes(self) -> None:
         """
@@ -48,7 +46,7 @@ class AttendanceUI(QMainWindow):
             )
             row = cur.fetchone()
             self.row = row[0].split(",")
-            self.row = [f'"{x.strip()}"' for x in self.row]       
+            self.row = [f'"{x.strip()}"' for x in self.row]
 
     def search_bar(self) -> None:
         """
@@ -63,8 +61,8 @@ class AttendanceUI(QMainWindow):
         )
         self.hbox.addWidget(self.search_ledit)
         self.vbox.addLayout(self.hbox)
-        
-    def view_students(self):
+
+    def view_students(self) -> None:
         """
         View all students in a table
         """
@@ -81,7 +79,13 @@ class AttendanceUI(QMainWindow):
         self.student_table.setColumnCount(5)
         self.student_table.setRowCount(len(self.rows))
         self.student_table.setHorizontalHeaderLabels(
-            ["Student ID", "Name", " Class ", "Attendance Percentage", "Days Present/Total Working Days"]
+            [
+                "Student ID",
+                "Name",
+                " Class ",
+                "Attendance Percentage",
+                "Days Present/Total Working Days",
+            ]
         )
         self.header = self.student_table.horizontalHeader()
         self.header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
@@ -94,7 +98,9 @@ class AttendanceUI(QMainWindow):
             std_id = QTableWidgetItem(value[0])
             std_name = QTableWidgetItem(f"{value[1]} {value[2]}")
             std_class = QTableWidgetItem(value[3])
-            std_percentage = QTableWidgetItem(f"{round((value[4]*100)/value[5],2)}")
+            std_percentage = QTableWidgetItem(
+                f"{round((value[4]*100)/value[5],2)}"
+            )
             std_ratio = QTableWidgetItem(f"{value[4]}/{value[5]}")
 
             std_name.setTextAlignment(Qt.AlignCenter)
@@ -125,7 +131,9 @@ class AttendanceCtrl:
         self.set_stylesheet()
 
     def connectSignals(self) -> None:
-
+        """
+        connects signals
+        """
         self.view.search_ledit.textChanged.connect(self.search_student)
         self.view.student_table.cellDoubleClicked.connect(self.graphs)
 
@@ -138,7 +146,9 @@ class AttendanceCtrl:
             std_id = QTableWidgetItem(value[0])
             std_name = QTableWidgetItem(f"{value[1]} {value[2]}")
             std_class = QTableWidgetItem(value[3])
-            std_percentage = QTableWidgetItem(f"{round((value[4]*100)/value[5],2)}")
+            std_percentage = QTableWidgetItem(
+                f"{round((value[4]*100)/value[5],2)}"
+            )
             std_ratio = QTableWidgetItem(f"{value[4]}/{value[5]}")
 
             std_name.setTextAlignment(Qt.AlignCenter)
@@ -180,46 +190,65 @@ class AttendanceCtrl:
         self.update_table(rows)
 
     def graphs(self) -> None:
-        widget = QWidget()
-        grid_layout = QGridLayout()
-        widget.setLayout(grid_layout)
+        """
+        Display graphs
+        """
+        self.widget = QWidget()
+        self.grid_layout = QGridLayout()
+        self.widget.setLayout(self.grid_layout)
 
         row = self.view.student_table.currentRow()
 
         with sqlite3.connect("employee.db") as conn:
             cur = conn.cursor()
             cur.execute(
-                f"""SELECT DAYS_JAN, DAYS_FEB, DAYS_MAR, DAYS_APR, DAYS_MAY , DAYS_JUN, DAYS_JUL, DAYS_AUG, DAYS_SEPT, DAYS_OCT, DAYS_NOV, DAYS_DEC, DAYS_PRESENT, TOTAL_WORKING_DAYS
-                    FROM STUDENT WHERE STUDENT_ID = ?""", (self.view.student_table.item(row, 0).text(),)
+                f"""SELECT DAYS_JAN,
+                           DAYS_FEB,
+                           DAYS_MAR,
+                           DAYS_APR,
+                           DAYS_MAY,
+                           DAYS_JUN,
+                           DAYS_JUL,
+                           DAYS_AUG,
+                           DAYS_SEPT,
+                           DAYS_OCT,
+                           DAYS_NOV,
+                           DAYS_DEC,
+                           DAYS_PRESENT,
+                           TOTAL_WORKING_DAYS
+                    FROM STUDENT WHERE STUDENT_ID = ?""",
+                (self.view.student_table.item(row, 0).text(),),
             )
             self.row = cur.fetchone()
-            
-            bar_graph = self.bargraph(self.row[0:12])
-            pie_chart = self.pie_chart(self.row[12:])
+
+            self.bargraph(self.row[:12])
+            self.pie_chart(self.row[12:])
+
             btn = QPushButton()
             btn.setText("Ok")
 
-            btn.clicked.connect(lambda: [self.view.stacked.setCurrentIndex(0), bar_graph.deleteLater(), pie_chart.deleteLater()])
-            
+            btn.clicked.connect(
+                lambda: [
+                    self.view.stacked.setCurrentIndex(0),
+                    self.widget.deleteLater(),
+                ]
+            )
 
-            grid_layout.addWidget(bar_graph,0,0 )
-            grid_layout.addWidget(pie_chart, 0, 1)
-            grid_layout.addWidget(btn, 2, 0,2,2)
-            self.view.stacked.addWidget(widget)
+            self.grid_layout.addWidget(self.bar_chart, 0, 0)
+            self.grid_layout.addWidget(self.pieChart, 0, 1)
+            self.grid_layout.addWidget(btn, 2, 0, 2, 2)
+
+            self.view.stacked.addWidget(self.widget)
             self.view.stacked.setCurrentIndex(1)
 
+    def bargraph(self, rows: Tuple[int, ...]) -> None:
+        """
+        Draw bar graph
+        """
+        set1 = QBarSet("Days Present")
+        set2 = QBarSet("Total Working Days")
 
-    def bargraph(self, rows: Tuple[int]) -> None:
-    
-        widget = QWidget()
-        vbox = QVBoxLayout()
-        widget.setLayout(vbox)
-
-
-        set1 = QBarSet('Days Present')
-        set2 = QBarSet('Total Working Days')
-        
-        set1.append([rows[0],rows[1],rows[2],rows[3],rows[4],rows[5],rows[6],rows[7],rows[8],rows[9],rows[10],rows[11]])
+        set1.append(list(rows))
         set2.append([31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
         series = QBarSeries()
         series.append(set1)
@@ -227,10 +256,23 @@ class AttendanceCtrl:
 
         chart = QChart()
         chart.addSeries(series)
-        chart.setTitle('Monthly Attendace')
+        chart.setTitle("Monthly Attendace")
         chart.setAnimationOptions(QChart.SeriesAnimations)
 
-        months = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec')
+        months = (
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "July",
+            "Aug",
+            "Sept",
+            "Oct",
+            "Nov",
+            "Dec",
+        )
 
         axisX = QBarCategoryAxis()
         axisX.append(months)
@@ -244,16 +286,16 @@ class AttendanceCtrl:
         chart.legend().setVisible(True)
         chart.legend().setAlignment(Qt.AlignBottom)
 
-        self.chartView = QChartView(chart)
+        self.bar_chart = QChartView(chart)
 
-        return self.chartView
-
-    def pie_chart(self, row):
-
+    def pie_chart(self, row: Tuple[int, ...]) -> None:
+        """
+        Draw pie chart
+        """
         series = QPieSeries()
         series.append("Days Present", row[0])
-        series.append("Total Working Days", row[1])
-        
+        series.append("Days Absent", row[1] - row[0])
+
         slice = QPieSlice()
         slice = series.slices()[1]
         slice.setExploded(False)
@@ -271,11 +313,8 @@ class AttendanceCtrl:
         chart.legend().setVisible(True)
         chart.legend().setAlignment(Qt.AlignBottom)
 
-        chartview = QChartView(chart)
-        chartview.setRenderHint(QPainter.Antialiasing)
-
-        return chartview
-
+        self.pieChart = QChartView(chart)
+        self.pieChart.setRenderHint(QPainter.Antialiasing)
 
     def set_stylesheet(self) -> None:
         """ sets the style of widgets according to the stylesheet specified """
@@ -286,6 +325,7 @@ class AttendanceCtrl:
 
         self.view.show()
         return self.app.exec_()
+
 
 if __name__ == "__main__":
     window = AttendanceCtrl("abcd")

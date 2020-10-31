@@ -295,7 +295,7 @@ class StudentsCtrl:
 
         indexes = self.view.student_table.selectedIndexes()
 
-        returnValue = msg.exec()
+        returnValue = msg.exec_()
         if returnValue == QMessageBox.Ok:
             student_id_list = []
             for index in indexes:
@@ -322,7 +322,7 @@ class StudentsCtrl:
 
         self.update_table(rows)
 
-    def add_record(self):
+    def add_record(self) -> None:
         """
         Add students to database
         """
@@ -368,7 +368,7 @@ class StudentsCtrl:
 
         self.view.stacked.setCurrentIndex(0)
 
-    def cancel(self):
+    def cancel(self) -> None:
         """
         go back to view students
         """
@@ -384,7 +384,7 @@ class StudentsCtrl:
         self.view.contact_ledit.clear()
         self.view.address_ledit.clear()
 
-    def student_info(self):
+    def student_info(self) -> None:
         """
         view student information
         """
@@ -394,7 +394,19 @@ class StudentsCtrl:
             cur = conn.cursor()
 
             cur.execute(
-                "select * from student where student_id = ?",
+                """SELECT STUDENT_ID,
+                          FIRST_NAME,
+                          LAST_NAME,
+                          GENDER,
+                          DOB,
+                          JOIN_DATE,
+                          CLASS,
+                          HOUSE,
+                          ROLL_NO,
+                          BUS_ROUTE,
+                          EMAIL,
+                          CONTACT,
+                          ADDRESS FROM STUDENT WHERE STUDENT_ID = ?""",
                 (self.view.student_table.item(row, 0).text(),),
             )
             (
