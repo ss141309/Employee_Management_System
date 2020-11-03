@@ -87,7 +87,7 @@ class DashBoardUI(QMainWindow):
         frame = QWidget()
         label_Image = QLabel(frame)
 
-        image_path = img_path
+        image_path = "resources/konqi.png"
         image_profile = QImage(image_path)
         image_profile = image_profile.scaled(
             250,
